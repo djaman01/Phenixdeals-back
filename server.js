@@ -14,8 +14,10 @@ app.use(cors({
   credentials: true
 }))
 
+//-------------------------------------------
+
 //Pour stocker les fichier images send par le front-end, dans le serveur
-const postProductRouter = require('./controllers/postProduct.js'); //Toutes les routes définies dans le fichier postProduct.js seront disponibles
+const postProductRouter = require('./controllers/postProduct.js'); //Toutes les routes définies dans le fichier postProduct.js seront disponibles, grâce à module.exports = router; dans postProduct.js
 
 app.use('/upload', postProductRouter);
 //--------------------------------------------

@@ -1,12 +1,12 @@
-//Fichier pour handle les POST Requests
+//Fichier pour handle les POST request de produits avec image
 
-//On installe express et on utilise express.Router, pour définir des routes pour une partie du code et l'utiliser dans d'autres fichier avec router.post par exemple au lieu de app.post
+//On installe express et on utilise express.Router, pour définir des routes pour une partie du code et au final, l'exporter pour pouvoir l'utiliser ailleurs
 const express = require('express');
-const router = express.Router();
+const router = express.Router(); //on n'utilise pas juste express(), car on veut exporter des routes ailleurs
 
 const multer = require('multer');
 const path = require('path');
-const { postAllArticles } = require('./model-doc')//on destructure les differents models
+const { postAllArticles } = require('../model-doc')//on destructure les differents models
 
 // Configuration de multer pour le stockage des images
 const storage = multer.diskStorage({
@@ -42,5 +42,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-//pour pouvoir accéder à toutes les routes configurées avec router.x() ex: (router.post()), lorsqu'on va importer postProduct.js dans server.js
+//pour pouvoir accéder router.post() dans server.js quand on va exporter postProduct.js
 module.exports = router;
+
+//Dans node.js 1 module = 1fichier .js
