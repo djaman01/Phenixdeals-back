@@ -6,7 +6,7 @@ const router = express.Router();
 
 const multer = require('multer');
 const path = require('path');
-const { postAllProduct } = require('../model-doc');
+const { postAllArticles } = require('./model-doc')//on destructure les differents models
 
 // Configuration de multer pour le stockage des images
 const storage = multer.diskStorage({
@@ -31,7 +31,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     const { type, infoProduit, auteur, prix, etat, code } = req.body;
 
     // Création d'un nouveau produit dans la base de données
-    const newProduct = await postAllProduct.create({ imageUrl, type, infoProduit, auteur, prix, etat, code });
+    const newProduct = await postAllArticles.create({ imageUrl, type, infoProduit, auteur, prix, etat, code });
 
     // Réponse avec le nouveau produit créé
     res.json(newProduct);
@@ -42,6 +42,5 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-//Dans node.js, 1 fichier = 1 module / module.exports permet d'exporter un certain code d'un module = d'un fichier
-//exportation du routeur crée, pour pouvoir l'utiliser dans d'autres fichiers
+//pour pouvoir accéder à toutes les routes configurées avec router.x() ex: (router.post()), lorsqu'on va importer postProduct.js dans server.js
 module.exports = router;
