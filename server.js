@@ -9,7 +9,7 @@ require('dotenv').config(); //To use the environment variable
 app.use(express.json());//To convert=parse incoming JSON data from HTTP requests, to Json Objects easier to read for the server
 
 app.use(cors({
-  origin: ["http://localhost:3000"],//to access the front-end side through this URL
+  origin: ["http://localhost:5173"],//to access the front-end side through this URL
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }))
@@ -17,9 +17,10 @@ app.use(cors({
 //-------------------------------------------
 
 //Pour stocker les fichier images send par le front-end, dans le serveur
-const postProductRouter = require('./controllers/postProduct.js'); //Toutes les routes définies dans le fichier postProduct.js seront disponibles, grâce à module.exports = router; dans postProduct.js
+const postProductRouter = require('./controllers/postProduct'); //Toutes les routes définies dans le fichier postProduct.js seront disponibles, grâce à module.exports = router; dans postProduct.js
 
-app.use('/upload', postProductRouter);
+app.use('/', postProductRouter);//ne pas mettre de route car déjà définie dans postProduct.js
+
 //--------------------------------------------
 
 //database connection: http://localhost:3005/ pour voir le message

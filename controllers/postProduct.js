@@ -1,5 +1,7 @@
 //Fichier pour handle les POST request de produits avec image
 
+//Dans node.js 1 module = 1fichier .js
+
 //On installe express et on utilise express.Router, pour définir des routes pour une partie du code et au final, l'exporter pour pouvoir l'utiliser ailleurs
 const express = require('express');
 const router = express.Router(); //on n'utilise pas juste express(), car on veut exporter des routes ailleurs
@@ -28,12 +30,12 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     const imageUrl = req.file.path.replace(/\\/g, '/');
 
     // Récupération des autres données du produit depuis le corps de la requête
-    const { type, infoProduit, auteur, prix, etat, code } = req.body;
+    const { type, auteur, infoArticle, prix, etat, code } = req.body;
 
     // Création d'un nouveau produit dans la base de données
-    const newProduct = await postAllArticles.create({ imageUrl, type, infoProduit, auteur, prix, etat, code });
+    const newProduct = await postAllArticles.create({type, auteur, infoArticle, prix, etat, code, imageUrl });
 
-    // Réponse avec le nouveau produit créé
+    //serveur envoi une reponse json, avec le nouveau produit crée au front-end: pour le voir faire dans le front-end console.log(response.data) / reponse etant le nom de la variable qui contient le axios.post dans le front
     res.json(newProduct);
   } catch (error) {
     // Gestion des erreurs
@@ -45,4 +47,4 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 //pour pouvoir accéder router.post() dans server.js quand on va exporter postProduct.js
 module.exports = router;
 
-//Dans node.js 1 module = 1fichier .js
+

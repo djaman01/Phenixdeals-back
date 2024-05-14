@@ -4,12 +4,12 @@ const mongoose = require("mongoose");
 const allArticles = mongoose.Schema(
   {
     type: "string",
-    imageUrl: "string",
-    infoProduit: "string",
     auteur: "string",
+    infoArticle: "string",
     prix: "string",
     etat: "string",
-    code: "string"
+    code: "string",
+    imageUrl: "string"
   },
 
   {
