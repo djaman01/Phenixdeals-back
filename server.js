@@ -14,14 +14,16 @@ app.use(cors({
   credentials: true
 }))
 
-//-------------------------------------------
-
-//Pour stocker les fichier images send par le front-end, dans le serveur
+//----POST Route Handler pour stocker fichier dans le serveur
 const postProductRouter = require('./controllers/postProduct'); //Toutes les routes définies dans le fichier postProduct.js seront disponibles, grâce à module.exports = router; dans postProduct.js
 
 app.use('/', postProductRouter);//ne pas mettre de route car déjà définie dans postProduct.js
 
-//--------------------------------------------
+
+//----GET Route Handler: plusieur roites get (voir dossier getProducts.js dans controllers)
+const getProductRouter = require('./controllers/getProducts')
+app.use('/', getProductRouter)
+
 
 //database connection: http://localhost:3005/ pour voir le message
 app.get('/', (req, res) => {
