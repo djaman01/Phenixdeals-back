@@ -14,6 +14,9 @@ app.use(cors({
   credentials: true
 }))
 
+//!!!! Pour que les images s'envoie au front: Serve static files from the 'uploads' directory
+app.use('/uploads', express.static('uploads'));
+
 //----POST Route Handler pour stocker fichier dans le serveur
 const postProductRouter = require('./controllers/postProduct'); //Toutes les routes définies dans le fichier postProduct.js seront disponibles, grâce à module.exports = router; dans postProduct.js
 

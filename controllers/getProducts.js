@@ -7,7 +7,7 @@ const { postAllArticles } = require('../model-doc')
 
 router.get('/homeProducts', async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 20; // Get the 'limit' query parameter from the request or default to 20
+    const limit = parseInt(req.query.limit) || 16; // Get the 'limit' query parameter from the request or default to 20
     const postArticles = await postAllArticles.find().sort({ _id: -1 }).limit(limit); // Sort by _id in descending order to get the last 20 products
     res.json(postArticles) // !!! res.json() OBLIGé Pour envoyer la data au front-end
   }
