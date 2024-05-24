@@ -18,14 +18,14 @@ app.use(cors({
 app.use('/uploads', express.static('uploads'));
 
 //----POST Route Handler pour stocker fichier dans le serveur
-const postProductRouter = require('./controllers/postProduct'); //Toutes les routes définies dans le fichier postProduct.js seront disponibles, grâce à module.exports = router; dans postProduct.js
+const postArticleRouter = require('./controllers/postArticle'); //Toutes les routes définies dans le fichier postArticle.js seront disponibles, grâce à module.exports = router; dans postArticle.js
 
-app.use('/', postProductRouter);//ne pas mettre de route car déjà définie dans postProduct.js
+app.use('/', postArticleRouter);//ne pas mettre de route car déjà définie dans postArticle.js
 
 
-//----GET Route Handler: plusieur routes get (voir dossier getProducts.js dans controllers)
-const getProductRouter = require('./controllers/getProducts')
-app.use('/', getProductRouter)
+//----GET Route Handler: plusieur routes get (voir dossier getArticles.js dans controllers)
+const getArticleRouter = require('./controllers/getArticles')
+app.use('/', getArticleRouter)
 
 
 //database connection: http://localhost:3005/ pour voir le message

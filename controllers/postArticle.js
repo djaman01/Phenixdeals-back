@@ -31,10 +31,10 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     const { type, auteur, infoArticle, prix, etat, code } = req.body;
 
     // Création d'un nouveau produit dans la base de données
-    const newProduct = await postAllArticles.create({type, auteur, infoArticle, prix, etat, code, imageUrl });
+    const newArticle = await postAllArticles.create({type, auteur, infoArticle, prix, etat, code, imageUrl });
 
     //serveur envoi une reponse json, avec le nouveau produit crée au front-end: pour le voir faire dans le front-end console.log(response.data) / reponse etant le nom de la variable qui contient le axios.post dans le front
-    res.json(newProduct);
+    res.json(newArticle);
   } catch (error) {
     // Gestion des erreurs
     console.error('Erreur lors de la création du produit :', error);
