@@ -1,7 +1,5 @@
 //Fichier pour handle les POST request de produits avec image
 
-//Dans node.js 1 module = 1fichier .js
-
 //On installe express et on utilise express.Router, pour définir des routes pour une partie du code et au final, l'exporter pour pouvoir l'utiliser ailleurs
 const express = require('express');
 const router = express.Router();
@@ -46,5 +44,6 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 //pour pouvoir accéder A TOUT les routes handler de ce fichier=module, dans server.js
 module.exports = router;
+
 
 

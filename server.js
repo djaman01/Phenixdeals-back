@@ -23,7 +23,7 @@ const postProductRouter = require('./controllers/postProduct'); //Toutes les rou
 app.use('/', postProductRouter);//ne pas mettre de route car déjà définie dans postProduct.js
 
 
-//----GET Route Handler: plusieur roites get (voir dossier getProducts.js dans controllers)
+//----GET Route Handler: plusieur routes get (voir dossier getProducts.js dans controllers)
 const getProductRouter = require('./controllers/getProducts')
 app.use('/', getProductRouter)
 

@@ -1,3 +1,5 @@
+//Dans Node.js, 1 module = 1 fichier
+
 const express = require('express');
 const router = express.Router();
 
