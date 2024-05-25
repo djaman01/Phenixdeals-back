@@ -20,60 +20,32 @@ router.get("/homeArticles", async (req, res) => {
   }
 });
 
-// To GET articles with type:'Tableau'
-router.get("/tableaux", async (req, res) => {
+// Generalized function to get articles by type (Donenr valeur à type dans router.get en-dessous)
+const getArticlesByType = async (type, res) => {
   try {
-    const tableaux = await postAllArticles
-      .find({ type: "Tableau" })
-      .sort({ _id: -1 });
-
-    tableaux
-      ? res.json(tableaux)
+    const articles = await postAllArticles.find({ type }).sort({ _id: -1 });
+    articles
+      ? res.json(articles)
       : res.status(404).json({ error: "Articles not found" });
   } catch (error) {
-    console.error("Error fetching articles from the database:", error);
+    console.error(`Error fetching ${type} articles from the database:`, error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-});
+};
 
-// To GET articles with type:'Decorations'
-router.get("/decorations", async (req, res) => {
-  try {
-    const decorations = await postAllArticles
-      .find({ type: "Décoration" })
-      .sort({ _id: -1 });
+// Route to GET articles with type:'Tableau'
+router.get("/tableaux", (req, res) => getArticlesByType("Tableau", res));
 
-    decorations
-      ? res.json(decorations)
-      : res.status(404).json({ error: "Articles not found" });
-  } catch (error) {
-    console.error("Error fetching articles from the database:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+// Route to GET articles with type:'Bijoux'
+router.get("/bijoux", (req, res) => getArticlesByType("Bijoux", res));
 
-// To GET articles with type:'Bijoux'
-router.get("/bijoux", async (req, res) => {
-  try {
-    const bijoux = await postAllArticles
-      .find({ type: "Bijoux" })
-      .sort({ _id: -1 });
+// Route to GET articles with type:'Bijoux'
+router.get("/decorations", (req, res) => getArticlesByType("Décoration", res));
 
-    bijoux
-      ? res.json(bijoux)
-      : res.status(404).json({ error: "Articles not found" });
-  } catch (error) {
-    console.error("Error fetching articles from the database:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// To GET ALL articles with all types
+// To GET ALL articles with all types: ne puet pas ce joindre avec getArticleByType car tous les types inclus
 router.get("/allArticles", async (req, res) => {
   try {
-    const allArticles = await postAllArticles
-      .find()
-      .sort({ _id: -1 });
+    const allArticles = await postAllArticles.find().sort({ _id: -1 });
 
     allArticles
       ? res.json(allArticles)
