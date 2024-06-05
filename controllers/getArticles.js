@@ -56,4 +56,19 @@ router.get("/allArticles", async (req, res) => {
   }
 });
 
+//To GET 1 product for ficheArticle.jsx in the front-end
+router.get("/article/:articleId", async (req, res) => {
+  try {
+    const articleId = req.params.articleId; //On extrait le paramètre dynamique définit dans l'url et qui est = _id, et on le store dans la variable articleId
+    const article = await postAllArticles.findById(articleId); //On cherche 1 produit spécifique grâce à _id extrait du paramètre de l'url et stocké dans la variable articleId
+
+    article
+      ? res.json(article)
+      : res.status(404).json({ error: "Aricle not found" });
+  } catch (error) {
+    console.error("Error fetching the article from the database:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 module.exports = router;

@@ -19,11 +19,10 @@ app.use('/uploads', express.static('uploads'));
 
 //----POST Route Handler pour stocker fichier dans le serveur
 const postArticleRouter = require('./controllers/postArticle'); //Toutes les routes définies dans le fichier postArticle.js seront disponibles, grâce à module.exports = router; dans postArticle.js
-
 app.use('/', postArticleRouter);//ne pas mettre de route car déjà définie dans postArticle.js
 
 
-//----GET Route Handler: plusieur routes get (voir dossier getArticles.js dans controllers)
+//----GET Route Handler: Toutes les routes get (voir dossier getArticles.js dans controllers)
 const getArticleRouter = require('./controllers/getArticles')
 app.use('/', getArticleRouter)
 
