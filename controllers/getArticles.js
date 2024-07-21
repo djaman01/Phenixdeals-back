@@ -26,8 +26,8 @@ router.get("/allArtists", async (req, res) => {
   try {
     // Récupère tous les documents
     const allArticles = await postAllArticles //await = attend que .find soit terminée avant de continuer l'éxécution du code / c'est pourquoi on a fait async dans cette fonction car elle est asynchrone
-      .find({}, { auteur: 1, _id: 0 }) //2nd argument de .find est appelé projection: 1er paramètre= champ à inclure dans les résultats 2eme paramètre= champ à exclure des résultats /pour Limiter les données récupérés aux champs 'auteur' et améliorer la rapidité, même si après on va encore créer une collection qu'avec auteur et sans doublons
-      .sort({ auteur: 1 }); //Trie les documents par le cham^p "auteur" en ordre croissant
+      .find({type:"Tableau"}, { auteur: 1, _id: 0 }) //On ne veut que les document de type "Tableau" + 2nd argument de .find est appelé projection: 1er paramètre= champ à inclure dans les résultats (car in ne veut fetch que le nom de l'artiste) + 2eme paramètre= champ à exclure des résultats /pour Limiter les données récupérés aux champs 'auteur' et améliorer la rapidité, même si après on va encore créer une collection qu'avec auteur et sans doublons
+      .sort({ auteur: 1 }); //Trie les documents par "auteur" et en ordre croissant
 
     // Utilisation du constructeur Set pour crée une array avec les noms des auteurs, SANS DOUBLONS ! Ainsi, même si j'ajoute plusieurs Kalmoun je n'aurais que 1 [Kalmoun]
     const uniqueArtists = [...new Set(allArticles.map((e) => e.auteur))];
