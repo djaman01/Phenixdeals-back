@@ -95,4 +95,19 @@ router.get("/article/:articleId", async (req, res) => {
   }
 });
 
+//To GET toutes les oeuvres d'un artiste spécifique pour PageArtiste.jsx
+router.get("/pageArtist/:auteur", async (req, res) => {
+  try {
+    const auteur = req.params.auteur; 
+    const oeuvreAuteur = await postAllArticles.find({auteur:auteur});
+
+    oeuvreAuteur
+      ? res.json(oeuvreAuteur)
+      : res.status(404).json({ error: "Oeuvres not found" });
+  } catch (error) {
+    console.error("Error fetching the oeuvres from the database:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 module.exports = router;
