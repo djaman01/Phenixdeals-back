@@ -26,6 +26,14 @@ app.use('/', postArticleRouter);//ne pas mettre de route car déjà définie dan
 const getArticleRouter = require('./controllers/getArticles')
 app.use('/', getArticleRouter)
 
+//----PUT Route Handler: Toutes les routes put (voir dossier putArticles.js dans controllers)
+const putArticleRouter = require('./controllers/putArticles')
+app.use('/', putArticleRouter)
+
+//----DELETE Route Handler: Toutes les routes delete (voir dossier deleteArticles.js dans controllers)
+const deleteArticleRouter = require('./controllers/deleteArticles')
+app.use('/', deleteArticleRouter)
+
 
 //database connection: http://localhost:3005/ pour voir le message
 app.get('/', (req, res) => {
