@@ -34,6 +34,10 @@ app.use('/', putArticleRouter)
 const deleteArticleRouter = require('./controllers/deleteArticles')
 app.use('/', deleteArticleRouter)
 
+//----POST Logins in the database
+const postLoginsRouter = require('./controllers/postLogin')
+app.use('/', postLoginsRouter)
+
 
 //database connection: http://localhost:3005/ pour voir le message
 app.get('/', (req, res) => {
