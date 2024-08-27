@@ -38,6 +38,10 @@ app.use('/', deleteArticleRouter)
 const postLoginsRouter = require('./controllers/postLogin')
 app.use('/', postLoginsRouter)
 
+//----GET LogOut
+const getLogOut = require('./controllers/getLogout')
+app.use('/', getLogOut)
+
 
 //database connection: http://localhost:3005/ pour voir le message
 app.get('/', (req, res) => {

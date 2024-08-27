@@ -5,7 +5,7 @@ const { loginModel } = require("../model-doc"); //Destructure le model pour pouv
 
 const bcrypt = require("bcryptjs"); //pour pouvoir utiliser le framework bcrypt, et chiffrer les motdepasse entrés par les users
 
-const jwt = require('jsonwebtoken'); //pour création d'un token et resté connecté pendant une durée determinée après s'etre login
+const jwt = require('jsonwebtoken'); //JWT= Json Web Token => pour création d'un token et resté connecté pendant une durée determinée après s'etre login
 
 //Pour créer un code pour la secret key du token (pas besoin de npm, car il est directement installé dans Node.js)
 const crypto = require('crypto');
@@ -39,6 +39,8 @@ router.post("/signUp", async (req, res) => { //async = asynd function pour pouvo
 
 });
 
+//!!!!! Pour activer la création du token, il faut mettre  axios.defaults.withCredentials = true; dans le Login component du front-end !!!!!!!!!!!
+
 //Pour login et aller vers dashboard quand on met nos identifiants dans la page login
 //The POST method is used to send data to the server to be processed. Even though you're not creating or modifying database records, you are sending login credentials for the server to verify. The POST method is appropriate for this kind of operation because it involves sending sensitive data (like passwords) securely to the server.
 router.post('/logIn', async (req, res) => {
@@ -50,13 +52,23 @@ router.post('/logIn', async (req, res) => {
     if (user) {
       const isMatch = await bcrypt.compare(password, user.password); //Si user existe: le MDP fourni est comparé avec celui qui est dans la base de donnée même s'il est haché
 
-      if (isMatch) { //Si Login et password existent => Création Token qu'on va store dans un cookie pour resté connecté une durée determinée
+      if (isMatch) { //!!! Création Token qu'on va store dans un cookie pour resté connecté une durée determinée, si login et password existent
         const token = jwt.sign({ email: user.email, role: user.role }, secret, { expiresIn: '1d' }); //jwt.sign = création token 1er argument= infos contenu dans token; 2eme argument: secret key pour + de securité, 3eme argument: durée avant expiration token pour maintenir la connexion, sauf si log out
-
-        res.cookie('Token', token, {
+        
+     //console.log dans le terminale du serveur et non de la page web,apparait après s'etre connecté dans login: Vérifie si le token a été créé et log les informations appropriées
+       if (token) {
+        console.log('Token Created Successfully');
+      } else {
+        console.log('Token creation failed');
+      }
+        //Envoie du cookie
+        res.cookie('AdminToken', token, {//'name of cookie', value of cookie,
           sameSite: 'None', // 'None' allows the cookie to be sent in cross-site requests
           secure: true // 'true' ensures that the cookie is only sent over HTTPS
         });
+
+        //Log confirmation de l'envoi du cookie
+         console.log('Token sent in cookie.');
 
         return res.json({ status: 'Success', role: user.role });
 
