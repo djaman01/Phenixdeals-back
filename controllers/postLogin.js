@@ -7,12 +7,7 @@ const bcrypt = require("bcryptjs"); //pour pouvoir utiliser le framework bcrypt,
 
 const jwt = require('jsonwebtoken'); //JWT= Json Web Token => pour création d'un token et resté connecté pendant une durée determinée après s'etre login
 
-//Pour créer un code pour la secret key du token (pas besoin de npm, car il est directement installé dans Node.js)
-const crypto = require('crypto');
-
-const secret = crypto.randomBytes(64).toString('hex'); // Generate a random 64-byte key and convert it to a hexadecimal string
-//console.log('Generated secret key:', secret); si je fais npx nodemon server.js, la clé générée va apparaitre
-
+const { secretKey } = require('../config')
 
 //Pour création identifiants
 
@@ -53,7 +48,7 @@ router.post('/logIn', async (req, res) => {
       const isMatch = await bcrypt.compare(password, user.password); //Si user existe: le MDP fourni est comparé avec celui qui est dans la base de donnée même s'il est haché
 
       if (isMatch) { //!!! Création Token qu'on va store dans un cookie pour resté connecté une durée determinée, si login et password existent
-        const token = jwt.sign({ email: user.email, role: user.role }, secret, { expiresIn: '1d' }); //jwt.sign = création token 1er argument= infos contenu dans token; 2eme argument: secret key pour + de securité, 3eme argument: durée avant expiration token pour maintenir la connexion, sauf si log out
+        const token = jwt.sign({ email: user.email, role: user.role }, secretKey, { expiresIn: '1d' }); //jwt.sign = création token 1er argument= infos contenu dans token; 2eme argument: secret key pour + de securité, 3eme argument: durée avant expiration token pour maintenir la connexion, sauf si log out
         
      //console.log dans le terminale du serveur et non de la page web,apparait après s'etre connecté dans login: Vérifie si le token a été créé et log les informations appropriées
        if (token) {
