@@ -4,6 +4,8 @@ const port = 3005 //app.listen(port, ...) sets up the server to listen on that p
 const db = require('./connect-db')
 const cors = require('cors')
 
+const verifyUser = require('./middlewares/verifyUser')
+
 require('dotenv').config(); //To use the environment variable
 
 app.use(express.json());//To convert=parse incoming JSON data from HTTP requests, to Json Objects easier to read for the server
@@ -42,6 +44,10 @@ app.use('/', postLoginsRouter)
 const getLogOut = require('./controllers/getLogout')
 app.use('/', getLogOut)
 
+//---Protected Route
+app.get('/toDashboard', verifyUser, (req, res) => {
+  res.send('Access Approved to Admin !');
+})
 
 //database connection: http://localhost:3005/ pour voir le message
 app.get('/', (req, res) => {
