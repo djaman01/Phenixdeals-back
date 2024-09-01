@@ -4,7 +4,7 @@ const port = 3005 //app.listen(port, ...) sets up the server to listen on that p
 const db = require('./connect-db')
 const cors = require('cors')
 
-const verifyUser = require('./middlewares/verifyUser')
+const verifyUser = require('./middlewares/protect')
 
 require('dotenv').config(); //To use the environment variable
 
@@ -13,7 +13,7 @@ app.use(express.json());//To convert=parse incoming JSON data from HTTP requests
 app.use(cors({
   origin: ["http://localhost:5173"],//to access the front-end side through this URL
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
+  credentials: true //To allow cookies to be sent
 }))
 
 //!!!! Pour que les images s'envoie au front: Serve static files from the 'uploads' directory
@@ -46,7 +46,7 @@ app.use('/', getLogOut)
 
 //---Protected Route
 app.get('/authentication', verifyUser, (req, res) => {
-  res.send('Access Approved to Admin !');
+  res.status(200).json({message:'Access Approved to Admin !'});
 })
 
 //database connection: http://localhost:3005/ pour voir le message
