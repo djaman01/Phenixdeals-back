@@ -50,7 +50,7 @@ app.use('/', getLogOut)
 
 //---Protected Route
 app.get('/authentication', verifyUser, (req, res) => {
-  res.status(200).json({message:'Access Approved to Admin !'});
+  res.status(200).json({message:'Authenticated'});
 })
 
 //database connection: http://localhost:3005/ pour voir le message
