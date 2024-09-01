@@ -3,12 +3,16 @@ const app = express();
 const port = 3005 //app.listen(port, ...) sets up the server to listen on that port. 
 const db = require('./connect-db')
 const cors = require('cors')
+const cookieParser = require('cookie-parser'); //For the cookies to be parsed and available in req.cookies throughout the application, including in the verifyUser middleware.
 
-const verifyUser = require('./middlewares/protect')
 
 require('dotenv').config(); //To use the environment variable
 
-app.use(express.json());//To convert=parse incoming JSON data from HTTP requests, to Json Objects easier to read for the server
+app.use(cookieParser()); // To parse cookies = Analyse and convert the cookies in a json format (Javascript Object Notation) so that it can be used in req.cookies, and then extract the token
+
+const verifyUser = require('./middlewares/protect')
+
+app.use(express.json());//To parse incoming JSON data from HTTP requests, to Json Objects easier to read for the server  if a client sends { "name": "John", "age": 30 } it converts this string into a JavaScript object like { name: 'John', age: 30 }, which you can access using req.body.name and req.body.age.
 
 app.use(cors({
   origin: ["http://localhost:5173"],//to access the front-end side through this URL
