@@ -45,7 +45,7 @@ const getLogOut = require('./controllers/getLogout')
 app.use('/', getLogOut)
 
 //---Protected Route
-app.get('/toDashboard', verifyUser, (req, res) => {
+app.get('/authentication', verifyUser, (req, res) => {
   res.send('Access Approved to Admin !');
 })
 

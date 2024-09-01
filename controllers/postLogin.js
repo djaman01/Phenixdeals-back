@@ -22,7 +22,7 @@ router.post("/signUp", async (req, res) => { //async = asynd function pour pouvo
 
     //send a json response to the client without the password because it's a private information
     res.status(201).json({ //201 = successfully created
-      message: "User registered Successfully",
+      message: "Signup Success",
       user: {
         email: newUser.email,
         role: newUser.role
@@ -66,7 +66,7 @@ router.post('/logIn', async (req, res) => {
         //Log confirmation de l'envoi du cookie
          console.log('Token sent in cookie.');
 
-        return res.json({ status: 'Success', role: user.role });
+        return res.status(200).json({ status: 'Success', role: user.role }); //200 = Request Succeeded
 
       } else { //Si password n'est pas trouvé dans la database, on aura 'Invalid Credentials' dans la console
         return res.status(401).json({ error: 'Invalid credentials' });
