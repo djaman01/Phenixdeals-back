@@ -60,7 +60,8 @@ router.post('/logIn', async (req, res) => {
         //Envoie du cookie
         res.cookie('AdminToken', token, {//'name of cookie', value of cookie,
           sameSite: 'None', // 'None' allows the cookie to be sent in cross-site requests
-          secure: true // 'true' ensures that the cookie is only sent over HTTPS
+          secure: true, // 'true' ensures that the cookie is only sent over HTTPS
+          path: '/' //makes sure that the cookie is handled consistently across all routes
         });
 
         //Log confirmation de l'envoi du cookie
