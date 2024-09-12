@@ -61,7 +61,7 @@ const getArticlesByType = async (type, res) => {
 router.get("/tableaux", (req, res) => getArticlesByType("Tableau", res));
 
 // Route to GET articles with type:'Bijoux'
-router.get("/bijoux", (req, res) => getArticlesByType("Bijoux", res));
+router.get("/bijoux", (req, res) => getArticlesByType("Bijou", res));
 
 // Route to GET articles with type:'Bijoux'
 router.get("/decorations", (req, res) => getArticlesByType("Décoration", res));
