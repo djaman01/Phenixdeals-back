@@ -9,7 +9,7 @@ const { postAllArticles } = require("../model-doc");
 router.get("/homeArticles", async (req, res) => {
   //function asynchrone donc il y aura await = attend que le code avec await soit terminée pour continuer l'éxécution du code
   try {
-    const limit = parseInt(req.query.limit) || 16; // Get the 'limit' query parameter from the request or default to 20
+    const limit = parseInt(req.query.limit) || 20; // Get the 'limit' query parameter from the request or default to 20
     const postArticles = await postAllArticles
       .find()
       .sort({ _id: -1 })
