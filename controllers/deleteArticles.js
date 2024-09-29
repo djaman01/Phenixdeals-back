@@ -8,7 +8,7 @@ const { postAllArticles } = require("../model-doc");
 // Fonction pour supprimer l'image du serveur (au début le serveur c'est mon pc et l'image est stocké dans le dossier uploads localement)
 const deleteImage = (imageUrl) => {
   const filePath = path.join(__dirname, '..', imageUrl); // Chemin complet vers l'image
-  fs.unlink(filePath, (err) => {
+  fs.unlink(filePath, (err) => { //la méthode fs.unlink de Node.js est utilisée pour supprimer un fichier du serveur (au depart mon pc), grace au filePath
     if (err) {
       console.error('Erreur lors de la suppression du fichier :', err);
     } else {
