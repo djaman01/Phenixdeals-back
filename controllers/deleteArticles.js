@@ -1,21 +1,29 @@
 const express = require("express");
 const router = express.Router();
-
-const fs = require('fs');
-const path = require('path');
+const cloudinaryConfig = require('../cloudinary'); // Ensure you import your Cloudinary configuration
 const { postAllArticles } = require("../model-doc");
 
-// Fonction pour supprimer l'image du serveur (au début le serveur c'est mon pc et l'image est stocké dans le dossier uploads localement)
-const deleteImage = (imageUrl) => {
-  const filePath = path.join(__dirname, '..', imageUrl); // Chemin complet vers l'image
-  fs.unlink(filePath, (err) => { //la méthode fs.unlink de Node.js est utilisée pour supprimer un fichier du serveur (au depart mon pc), grace au filePath
-    if (err) {
-      console.error('Erreur lors de la suppression du fichier :', err);
+
+
+const deleteImageFromCloudinary = async (imageUrl) => {
+  // Extract the public ID including the folder: le public id est le nombre juste avant .jpg de l'imageUrl dans la database mongoDBAtlas
+  const publicId = `phenixArticles/${imageUrl.split('/').pop().split('.')[0]}`; 
+  console.log('Extracted Public ID:', publicId); // Log the public ID for debugging
+  
+  try {
+    const result = await cloudinaryConfig.uploader.destroy(publicId);
+    console.log('Cloudinary deletion result:', result); // Log the result to understand if the deletion was successful
+    if (result.result !== "ok") {
+      console.error('Failed to delete image from Cloudinary:', result);
     } else {
-      console.log('Fichier supprimé avec succès :', imageUrl);
+      console.log('Image deleted successfully from Cloudinary:', imageUrl);
     }
-  });
+  } catch (err) {
+    console.error('Error deleting image from Cloudinary:', err);
+  }
 };
+
+
 
 // Route DELETE pour supprimer un article et l'image associée
 router.delete('/deleteArticle/:articleId', async (req, res) => {
@@ -26,9 +34,9 @@ router.delete('/deleteArticle/:articleId', async (req, res) => {
     const article = await postAllArticles.findById(articleId);
 
     if (article) {
-      // Si l'article a une image associée, la supprimer du serveur
+      // Si l'article a une image associée, la supprimer de Cloudinary
       if (article.imageUrl) {
-        deleteImage(article.imageUrl);
+        await deleteImageFromCloudinary(article.imageUrl);
       }
 
       // Supprimer l'article de la base de données
