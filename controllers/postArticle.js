@@ -22,8 +22,8 @@ router.post('/upload', async (req, res) => {
 
     const image = req.files.file; // Extract the image from the request because file = name of the property that contain the image, inside the imageFile state variable (voir front-end addArticle)
 
-    // Upload the file to Cloudinary, using the folder 'phenixArticles'
-    const result = await cloudinaryConfig.uploader.upload(image.tempFilePath, {
+    // Upload the file to Cloudinary, using the folder 'phenixArticles' / !!!cloudinaryResult aura pour value un objet envoyé par cloudinary qui contiendra plusieurs properties: {"result":"ok", "public_id":"...","secure_url", "url"...etc}
+    const cloudinaryResult = await cloudinaryConfig.uploader.upload(image.tempFilePath, {
       folder: 'phenixArticles', // Folder Name in Cloudinary
     });
 
@@ -38,7 +38,7 @@ router.post('/upload', async (req, res) => {
       prix,
       etat,
       code,
-      imageUrl: result.secure_url // Send the cloudinary URL to the MongoDB Database
+      imageUrl: cloudinaryResult.secure_url // Send the cloudinary URL to the MongoDB Database
     });
 
     // Respond with the new product created

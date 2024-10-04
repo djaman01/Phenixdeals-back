@@ -8,13 +8,13 @@ const { postAllArticles } = require("../model-doc");
 const deleteImageFromCloudinary = async (imageUrl) => {
   // Extract the public ID including the folder: le public id est le nombre juste avant .jpg de l'imageUrl dans la database mongoDBAtlas
   const publicId = `phenixArticles/${imageUrl.split('/').pop().split('.')[0]}`; 
-  console.log('Extracted Public ID:', publicId); // Log the public ID for debugging
+  //console.log('Extracted Public ID:', publicId); // Log the public ID for debugging
   
   try {
-    const result = await cloudinaryConfig.uploader.destroy(publicId);
-    console.log('Cloudinary deletion result:', result); // Log the result to understand if the deletion was successful
-    if (result.result !== "ok") {
-      console.error('Failed to delete image from Cloudinary:', result);
+    const cloudinaryResult = await cloudinaryConfig.uploader.destroy(publicId); //cloudinaryResult aura pour value un objet envoyé par cloudinary qui contiendra plusieurs properties: {"result":"ok", "public_id":"...","secure_url", "url"...etc}
+
+    if (cloudinaryResult.result !== "ok") {
+      console.error('Failed to delete image from Cloudinary:');
     } else {
       console.log('Image deleted successfully from Cloudinary:', imageUrl);
     }
