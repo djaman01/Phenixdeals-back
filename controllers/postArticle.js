@@ -20,10 +20,10 @@ router.post('/upload', async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    const image = req.files.file; // Extract the image from the request because file = name of the property that contain the image, inside the imageFile state variable (voir front-end addArticle)
+    const imageUploaded = req.files.file; // Extract the image from the request where "file" = name of the property that contain the image that we've uploaded
 
-    // Upload the file to Cloudinary, using the folder 'phenixArticles' / !!!cloudinaryResult aura pour value un objet envoyé par cloudinary qui contiendra plusieurs properties: {"result":"ok", "public_id":"...","secure_url", "url"...etc}
-    const cloudinaryResult = await cloudinaryConfig.uploader.upload(image.tempFilePath, {
+    // Upload the image to Cloudinary, using the folder 'phenixArticles' / !!!cloudinaryResult aura pour value un objet envoyé par cloudinary qui contiendra plusieurs properties: {"result":"ok", "public_id":"...","secure_url", "url"...etc}
+    const cloudinaryResult = await cloudinaryConfig.uploader.upload(imageUploaded.tempFilePath, {
       folder: 'phenixArticles', // Folder Name in Cloudinary
     });
 
@@ -38,7 +38,7 @@ router.post('/upload', async (req, res) => {
       prix,
       etat,
       code,
-      imageUrl: cloudinaryResult.secure_url // Send the cloudinary URL to the MongoDB Database
+      imageUrl: cloudinaryResult.secure_url // On utilise la property secure_url de l'objet renvoyé dans cloudinaryResult, pour récupérer l'url sécurisé de l'image uploadé et l'envoyé à la MongoDB Database
     });
 
     // Respond with the new product created
