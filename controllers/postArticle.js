@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const fileUpload = require('express-fileupload'); // Middleware for handling file uploads
+const fileUpload = require('express-fileupload'); // Middleware for handling file uploads and enables you to use req.files to access the uploaded files in the request. 
 const cloudinaryConfig = require('../cloudinary'); // Import Cloudinary configuration
 const { postAllArticles } = require('../model-doc'); // Import your model
 
@@ -16,21 +16,21 @@ router.use(fileUpload({
 router.post('/upload', async (req, res) => {
   try {
     // Ensure a file is provided
-    if (!req.files || Object.keys(req.files).length === 0) {
+    if (!req.files) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    const file = req.files.file; // Extract the image from the request
+    const image = req.files.file; // Extract the image from the request because file = name of the property that contain the image, inside the imageFile state variable (voir front-end addArticle)
 
     // Upload the file to Cloudinary, using the folder 'phenixArticles'
-    const result = await cloudinaryConfig.uploader.upload(file.tempFilePath, {
+    const result = await cloudinaryConfig.uploader.upload(image.tempFilePath, {
       folder: 'phenixArticles', // Folder Name in Cloudinary
     });
 
     // Extract the other product data sent from the front-end
     const { type, auteur, infoArticle, prix, etat, code } = req.body;
 
-    // Create a new product in the database with the received info and the image URL
+    // Create a new product in the database with the received info and the image URL as values
     const newArticle = await postAllArticles.create({
       type,
       auteur,
@@ -38,7 +38,7 @@ router.post('/upload', async (req, res) => {
       prix,
       etat,
       code,
-      imageUrl: result.secure_url // Use the Cloudinary URL here
+      imageUrl: result.secure_url // Send the cloudinary URL to the MongoDB Database
     });
 
     // Respond with the new product created
