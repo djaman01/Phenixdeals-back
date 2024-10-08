@@ -18,6 +18,9 @@ const allArticles = mongoose.Schema(
     etat: {
       type: String,
     },
+    bestDeal: {
+      type: String,
+    },
     code: {
       type: String,
     },

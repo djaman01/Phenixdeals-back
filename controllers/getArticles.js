@@ -80,6 +80,19 @@ router.get("/allArticles", async (req, res) => {
   }
 });
 
+// To GET only articles with bestDeal = "Yes"
+router.get("/bestDeals", async (req, res) => {
+  try {
+    const bestArticles = await postAllArticles.find({ bestDeal: "Yes" }).sort({ _id: -1 });
+    bestArticles
+      ? res.json(bestArticles)
+      : res.status(404).json({ error: "No best deal articles found" });
+  } catch (error) {
+    console.error("Error fetching best deal articles from the database:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 //To GET 1 product for ficheArticle.jsx in the front-end
 router.get("/article/:articleId", async (req, res) => {
   try {

@@ -28,7 +28,7 @@ router.post('/upload', async (req, res) => {
     });
 
     // Extract the other product data sent from the front-end
-    const { type, auteur, infoArticle, prix, etat, code } = req.body;
+    const { type, auteur, infoArticle, prix, etat, bestDeal, code } = req.body;
 
     // Create a new product in the database with the received info and the image URL as values
     const newArticle = await postAllArticles.create({
@@ -38,6 +38,7 @@ router.post('/upload', async (req, res) => {
       prix,
       etat,
       code,
+      bestDeal,
       imageUrl: cloudinaryResult.secure_url // On utilise la property secure_url de l'objet renvoyé dans cloudinaryResult, pour récupérer l'url sécurisé de l'image uploadé et l'envoyé à la MongoDB Database
     });
 
