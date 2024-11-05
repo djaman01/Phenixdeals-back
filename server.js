@@ -15,7 +15,7 @@ const verifyUser = require('./middlewares/protect')
 app.use(express.json());//To parse incoming JSON data from HTTP requests, to Json Objects easier to read for the server  if a client sends { "name": "John", "age": 30 } it converts this string into a JavaScript object like { name: 'John', age: 30 }, which you can access using req.body.name and req.body.age.
 
 app.use(cors({
-  origin: ["http://localhost:5173"],//front-end domain: to access the front-end side through this URL
+  origin: ["https://www.phenix-deals.com"],//front-end domain: to access the front-end side through this URL
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true //To allow cookies to be sent
 }))
