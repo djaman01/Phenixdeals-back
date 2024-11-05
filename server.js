@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 3005 //app.listen(port, ...) sets up the server to listen on that port. 
+const port = process.env.PORT
 const db = require('./connect-db')
 const cors = require('cors')
 const cookieParser = require('cookie-parser'); //For the cookies to be parsed and available in req.cookies throughout the application, including in the verifyUser middleware.
@@ -15,10 +15,11 @@ const verifyUser = require('./middlewares/protect')
 app.use(express.json());//To parse incoming JSON data from HTTP requests, to Json Objects easier to read for the server  if a client sends { "name": "John", "age": 30 } it converts this string into a JavaScript object like { name: 'John', age: 30 }, which you can access using req.body.name and req.body.age.
 
 app.use(cors({
-  origin: ["https://www.phenix-deals.com"],//front-end domain: to access the front-end side through this URL
+  origin: ["https://www.phenix-deals.com", "https://phenixdeals-vite-n4qpkja68-djaman01s-projects.vercel.app"], // Add all allowed front-end URLs
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true //To allow cookies to be sent
-}))
+  credentials: true // Allow cookies to be sent
+}));
+
 
 //!!!! Pour que les images s'envoie au front: Serve static files from the 'uploads' directory
 app.use('/uploads', express.static('uploads'));
