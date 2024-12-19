@@ -29,7 +29,7 @@ router.get("/sitemap.xml", async (req, res) => {
         priority: 0.8, // Priorité relative
       },
       {
-        url: `/article/${article._id}`, // Utilisation de l'ID de l'article pour la fiche article
+        url: `/fichArticle/${article._id}`, //Utilisation de l'url /ficheArticle et non la route /article et de l'_id donné par mongoDB 
         changefreq: "yearly", // La page change rarement
         priority: 0.8, // Priorité relative
       },
