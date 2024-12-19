@@ -60,6 +60,12 @@ app.get("/authentication", verifyUser, (req, res) => {
 const sitemapRouter = require("./SEO/sitemap");
 app.use("/", sitemapRouter);
 
+
+//Permet de rediriger toute tentative d'accès à www.phenix-deals.com/sitemap.xml vers https://phenixdeals-back.onrender.com/sitemap.xml. Ainsi le google Search console pourra accéder à ma sitemap.xml à partir de l'url www.phenix-deals.com/sitemap.xml
+app.get('/sitemap.xml', (req, res) => {
+  res.redirect(301, 'https://phenixdeals-back.onrender.com/sitemap.xml');
+});
+
 //database connection: http://localhost:3005/ pour voir le message
 app.get("/", (req, res) => {
   res.send("Hello, this is your Express server!");
