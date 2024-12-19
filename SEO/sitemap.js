@@ -6,9 +6,10 @@ const { SitemapStream, streamToPromise } = require("sitemap");
 
 //Readable : Transforme un tableau d'URLs en un flux lisible.
 const { Readable } = require("stream");
-const { postAllArticles } = require("./model-doc");
+const { postAllArticles } = require("../model-doc");
 
-// Route pour générer le sitemap
+// Route pour générer le sitemap à partir du back-end
+//Pour y accéder aller sur le lien: https://phenixdeals-back.onrender.com/sitemap.xml (url trouvé sur render)
 router.get("/sitemap.xml", async (req, res) => {
   try {
     // Configuration des en-têtes pour indiquer qu'il s'agit d'un fichier XML

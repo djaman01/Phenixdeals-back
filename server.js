@@ -57,7 +57,7 @@ app.get("/authentication", verifyUser, (req, res) => {
 });
 
 //Fichiers pour SEO (sitemap)
-const sitemapRouter = require("./sitemap");
+const sitemapRouter = require("./SEO/sitemap");
 app.use("/", sitemapRouter);
 
 //database connection: http://localhost:3005/ pour voir le message
