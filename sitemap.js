@@ -6,7 +6,7 @@ const { SitemapStream, streamToPromise } = require("sitemap");
 
 //Readable : Transforme un tableau d'URLs en un flux lisible.
 const { Readable } = require("stream");
-const { postAllArticles } = require("../model-doc");
+const { postAllArticles } = require("./model-doc");
 
 // Route pour générer le sitemap
 router.get("/sitemap.xml", async (req, res) => {
