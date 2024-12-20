@@ -24,11 +24,17 @@ app.use(
   })
 );
 
+// Redirection pour phenix-deals/sitemap.xml vers back/sitemap.xml | Doit être définie avant les autres routes API, mais après les middlewares essentiels comme cookieParser, express.json, et cors
+app.get("/sitemap.xml", (req, res) => {
+  console.log("Redirecting to Render-backend sitemap...");
+  res.redirect(301, "https://phenixdeals-back.onrender.com/sitemap.xml");
+});
+
 //!!!! Pour que les images s'envoie au front: Serve static files from the 'uploads' directory
 app.use("/uploads", express.static("uploads"));
 
 //----POST Route Handler pour stocker fichier dans le serveur / le "/" veut dire que toutes les routes définies dans le fichier postArticle.js seront disponibles, grâce à module.exports = router; dans postArticle.js
-const postArticleRouter = require("./controllers/postArticle"); 
+const postArticleRouter = require("./controllers/postArticle");
 app.use("/", postArticleRouter); //ne pas mettre de route car déjà définie dans postArticle.js
 
 //----GET Route Handler: Toutes les routes get (voir dossier getArticles.js dans controllers)
@@ -59,8 +65,6 @@ app.get("/authentication", verifyUser, (req, res) => {
 //Fichiers pour SEO (sitemap)
 const sitemapRouter = require("./SEO/sitemap");
 app.use("/", sitemapRouter);
-
-
 
 //database connection: http://localhost:3005/ pour voir le message
 app.get("/", (req, res) => {
