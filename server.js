@@ -27,8 +27,8 @@ app.use(
 //!!!! Pour que les images s'envoie au front: Serve static files from the 'uploads' directory
 app.use("/uploads", express.static("uploads"));
 
-//----POST Route Handler pour stocker fichier dans le serveur
-const postArticleRouter = require("./controllers/postArticle"); //Toutes les routes définies dans le fichier postArticle.js seront disponibles, grâce à module.exports = router; dans postArticle.js
+//----POST Route Handler pour stocker fichier dans le serveur / le "/" veut dire que toutes les routes définies dans le fichier postArticle.js seront disponibles, grâce à module.exports = router; dans postArticle.js
+const postArticleRouter = require("./controllers/postArticle"); 
 app.use("/", postArticleRouter); //ne pas mettre de route car déjà définie dans postArticle.js
 
 //----GET Route Handler: Toutes les routes get (voir dossier getArticles.js dans controllers)
@@ -61,10 +61,6 @@ const sitemapRouter = require("./SEO/sitemap");
 app.use("/", sitemapRouter);
 
 
-//Permet de rediriger toute tentative d'accès à www.phenix-deals.com/sitemap.xml vers https://phenixdeals-back.onrender.com/sitemap.xml. Ainsi le google Search console pourra accéder à ma sitemap.xml à partir de l'url www.phenix-deals.com/sitemap.xml
-app.get('/sitemap.xml', (req, res) => {
-  res.redirect(301, 'https://phenixdeals-back.onrender.com/sitemap.xml');
-});
 
 //database connection: http://localhost:3005/ pour voir le message
 app.get("/", (req, res) => {
