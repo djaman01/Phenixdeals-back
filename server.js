@@ -24,12 +24,6 @@ app.use(
   })
 );
 
-// Redirection pour phenix-deals/sitemap.xml vers back/sitemap.xml | Doit être définie avant les autres routes API, mais après les middlewares essentiels comme cookieParser, express.json, et cors
-app.get("/sitemap.xml", (req, res) => {
-  console.log("Redirecting to Render-backend sitemap...");
-  res.redirect(301, "https://phenixdeals-back.onrender.com/sitemap.xml");
-});
-
 //!!!! Pour que les images s'envoie au front: Serve static files from the 'uploads' directory
 app.use("/uploads", express.static("uploads"));
 
