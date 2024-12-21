@@ -57,14 +57,9 @@ const getArticlesByType = async (type, res) => {
   }
 };
 
-// Route to GET articles with type:'Tableau'
+// Route to GET articles with type:'Tableau' / Avant j'avais les types Bijoux et Objets décorations: c'est pourquoi j'avais fait ce router.get pour /tableaux et /bijoux ..etc
 router.get("/tableaux", (req, res) => getArticlesByType("Tableau", res));
 
-// Route to GET articles with type:'Bijoux'
-router.get("/bijoux", (req, res) => getArticlesByType("Bijou", res));
-
-// Route to GET articles with type:'Bijoux'
-router.get("/decorations", (req, res) => getArticlesByType("Décoration", res));
 
 // To GET ALL articles with all types: ne peut pas ce joindre avec getArticleByType car tous les types inclus
 router.get("/allArticles", async (req, res) => {
