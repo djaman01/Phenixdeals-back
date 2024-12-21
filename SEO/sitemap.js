@@ -19,29 +19,29 @@ router.get("/sitemap.xml", async (req, res) => {
     // Retourne des objets JavaScript simples pour optimiser les performances pour la lecture
     const articles = await postAllArticles.find({}, "auteur _id").lean(); //pas de , entre auteur et _id car ce n'est pas une array, mais une chaine de carctère avec une liste de champs séparés par des espaces
 
-    // Construction des liens: Crée un tableau contenant les URLs pour le sitemap
+    // Construction des liens: Crée un tableau contenant les URLs pour le sitemap et priority = importances des pages pour guider le robot google
 
     // Liens pour les pages dynamiques: On dit dynamique car la fin de leur url change en fonction du nom de l'auteur ou de l'_id de l'article
     const dynamicLinks = articles.flatMap((article) => [
       {
         url: `/pageArtist/${encodeURIComponent(article.auteur)}`, // Encode l'auteur pour éviter les caractères spéciaux
         changefreq: "weekly", // La page change fréquemment
-        priority: 0.8, // Priorité relative
+        priority: 1.0, // Priorité relative
       },
       {
         url: `/ficheArticle/${article._id}`, //Utilisation de l'url /ficheArticle et non la route /article et de l'_id donné par mongoDB 
         changefreq: "yearly", // La page change rarement
-        priority: 0.8, // Priorité relative
+        priority: 0.1, // Priorité relative
       },
     ]);
 
     // Liens pour les pages statiques: on dit statiques que leur url ne changent pas, même si pour certaines pages comme les pages accueil, artistes ou tableaux, leurs contenus changent régulièrement
     const staticLinks = [
       { url: "/", changefreq: "daily", priority: 1.0 },
-      { url: "/allArtists", changefreq: "daily", priority: 1.0 },
-      { url: "/tableaux", changefreq: "daily", priority: 1.0 },
+      { url: "/allArtists", changefreq: "daily", priority: 0.8 },
+      { url: "/tableaux", changefreq: "daily", priority: 0.8 },
       { url: "/bestDeals", changefreq: "weekly", priority: 0.8 },
-      { url: "/vendre", changefreq: "yearly", priority: 0.5 },
+      { url: "/vendre", changefreq: "yearly", priority: 0.1 },
       { url: "/concept", changefreq: "yearly", priority: 0.5 },
     ];
 
