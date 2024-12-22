@@ -38,9 +38,9 @@ router.get("/sitemap.xml", async (req, res) => {
     // Liens pour les pages statiques: on dit statiques que leur url ne changent pas, même si pour certaines pages comme les pages accueil, artistes ou tableaux, leurs contenus changent régulièrement
     const staticLinks = [
       { url: "/", changefreq: "daily", priority: 1.0 },
-      { url: "/allArtists", changefreq: "daily", priority: 0.8 },
+      { url: "/allArtists", changefreq: "monthly", priority: 0.8 },
       { url: "/tableaux", changefreq: "daily", priority: 0.8 },
-      { url: "/bestDeals", changefreq: "weekly", priority: 0.8 },
+      { url: "/bestDeals", changefreq: "monthly", priority: 0.8 },
       { url: "/vendre", changefreq: "yearly", priority: 0.1 },
       { url: "/concept", changefreq: "yearly", priority: 0.5 },
     ];
