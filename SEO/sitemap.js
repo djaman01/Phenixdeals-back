@@ -20,8 +20,7 @@ router.get("/sitemap.xml", async (req, res) => {
     // Liens pour les pages statiques: on dit statiques que leur url ne changent pas, même si pour certaines pages comme les pages accueil, artistes ou tableaux, leurs contenus changent régulièrement
     const staticLinks = [
       { url: "/", changefreq: "daily", priority: 1.0 },
-      { url: "/bestDeals", changefreq: "monthly", priority: 0.8 },
-      { url: "/concept", changefreq: "yearly", priority: 0.5 },
+      { url: "/allArtists", changefreq: "monthly", priority: 0.8 },
     ];
 
     // J'en ai besoin pour extraire l'auteur de chaque tableau et pouvoir le mettre dans l'url dynamique de pageArtist
@@ -32,7 +31,7 @@ router.get("/sitemap.xml", async (req, res) => {
     const dynamicLinks = articles.map((article) => ({
       url: `/pageArtist/${encodeURIComponent(article.auteur)}`, // Encode l'auteur pour éviter les caractères spéciaux
       changefreq: "weekly", // La page change fréquemment
-      priority: 1.0, // Priorité relative
+      priority: 0.9, // Priorité relative
     }));
 
     // Combiner les liens dynamiques et statiques
