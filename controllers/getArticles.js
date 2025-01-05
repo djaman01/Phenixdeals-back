@@ -88,7 +88,7 @@ router.get("/bestDeals", async (req, res) => {
   }
 });
 
-//To GET 1 product for ficheArticle.jsx in the front-end
+//To GET 1 product for ficheTableau.jsx in the front-end
 router.get("/article/:articleId", async (req, res) => {
   try {
     const articleId = req.params.articleId; //On extrait le paramètre dynamique définit dans l'url et qui est = _id, et on le store dans la variable articleId
