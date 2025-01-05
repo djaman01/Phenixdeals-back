@@ -15,28 +15,35 @@ router.get("/sitemap.xml", async (req, res) => {
     // Configuration des en-têtes pour indiquer qu'il s'agit d'un fichier XML
     res.header("Content-Type", "application/xml");
 
-    // Construction des liens: Crée un tableau contenant les URLs pour le sitemap et priority = importances des pages pour guider le robot google / Ne mettre que les pages qu'on veut voir dans les recherches google dans le sitemap
+    // On store notre modèle avec les properties dans la variable articles // .find({}): Récupère tous les articles dans la base de données "code": Mais que le champ "code" pour éviter trop de données
+    // Retourne des objets JavaScript simples pour optimiser les performances pour la lecture
+    const articles = await postAllArticles.find({}, "auteur _id").lean(); //pas de , entre auteur et _id car ce n'est pas une array, mais une chaine de carctère avec une liste de champs séparés par des espaces
+
+    // Construction des liens: Crée un tableau contenant les URLs pour le sitemap et priority = importances des pages pour guider le robot google
 
     // Liens pour les pages statiques: on dit statiques que leur url ne changent pas, même si pour certaines pages comme les pages accueil, artistes ou tableaux, leurs contenus changent régulièrement
-    const staticLinks = [
-      { url: "/", changefreq: "daily", priority: 1.0 },
-      { url: "/allArtists", changefreq: "weekly", priority: 0.8 },
-      { url: "/tableaux", changefreq: "weekly", priority: 0.8 }, //Cela peut influencer la fréquence de crawl ou l'attention accordée aux pages, mais pas leur classement dans les résultats de recherche 
-    ];
+    const staticLinks = [{ url: "/", changefreq: "daily", priority: 1.0 }];
 
-    // J'en ai besoin pour extraire l'auteur de chaque tableau et pouvoir le mettre dans l'url dynamique de pageArtist
-    // On store notre modèle avec les properties dans la variable articles // .find({}): Récupère tous les articles dans la base de données: Mais que le champs "auteur" pour éviter trop de données
-    const articles = await postAllArticles.find({}, "auteur").lean();
-
-    // Liens pour les pages dynamiques: On dit dynamique car la fin de leur url change en fonction du nom de l'auteur de l'article
-    const dynamicLinks = articles.map((article) => ({
-      url: `/pageArtist/${encodeURIComponent(article.auteur)}`, // Encode l'auteur pour éviter les caractères spéciaux
-      changefreq: "weekly", // La page change fréquemment
-      priority: 0.8, 
-    }));
+    // Liens pour les pages dynamiques: On dit dynamique car la fin de leur url change en fonction du nom de l'auteur ou de l'_id de l'article
+    const dynamicLinks = articles.flatMap((article) => [
+      {
+        url: `/pageArtist/${encodeURIComponent(article.auteur)}`, // Encode l'auteur pour éviter les caractères spéciaux
+        changefreq: "weekly", // La page change fréquemment
+        priority: 0.8, // Priorité relative
+      },
+      {
+        url: `/ficheArticle/${article._id}`, //Utilisation de l'url /ficheArticle et non la route /article et de l'_id donné par mongoDB
+        changefreq: "yearly", // La page change rarement
+        priority: 0.75, // Priorité relative pour expliquer au google bot comment classer les pages entre elles dans le site et la fréquence de crawl; mais ne garanti pas une meilleure position dans les résultats de recherches
+      },
+    ]);
 
     // Combiner les liens dynamiques et statiques
     const allLinks = [...staticLinks, ...dynamicLinks];
+
+    //!!!!! Quand des pages de siets ne contiennent aps beaucoup de texte ou de liens vers 'autres pages de site, le google bot peut les considérer commeu ne erreur "Soft 404" et ne pas les indéxer
+    //Donc comme mes pages Artistes ne contiennent aps beaucoup de text, ca fait en general erreur Soft404 et google bot priorise les fichesTableaux car elles contiennt du text, des liens et plus d'infos.
+    //C'est pourquopi je mets les ficheTableaux en 0.75, pour les laisser prioritaires, vu que par défauts, le google bot les priorisent par rapport aux pages atistes, au vu de leur contenu
 
     // Création du sitemap avec SitemapStream
     const stream = new SitemapStream({
