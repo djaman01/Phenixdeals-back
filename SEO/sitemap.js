@@ -32,7 +32,7 @@ router.get("/sitemap.xml", async (req, res) => {
         priority: 0.8, // Priorité relative (impossible de mettre 0.75 ou 0.85, car ca ve etre considéré comme 0.8 ou 0.9)
       },
       {
-        url: `/${article.auteur}/${article._id}`, //Utilisation de l'url et non la route /article
+        url: `/${encodeURIComponent(article.auteur)}/${article._id}`, //Utilisation de l'url et non la route /article
         changefreq: "yearly", // La page change rarement
         priority: 0.7, // Priorité relative pour expliquer au google bot comment classer les pages entre elles dans le site et la fréquence de crawl; mais ne garanti pas une meilleure position dans les résultats de recherches
       },
