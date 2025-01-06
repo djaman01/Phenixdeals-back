@@ -25,18 +25,34 @@ router.get("/sitemap.xml", async (req, res) => {
     const staticLinks = [{ url: "/", changefreq: "daily", priority: 1.0 }];
 
     // Liens pour les pages dynamiques: On dit dynamique car la fin de leur url change en fonction du nom de l'auteur ou de l'_id de l'article
-    const dynamicLinks = articles.flatMap((article) => [
-      {
-        url: `/pageArtist/${encodeURIComponent(article.auteur)}`, // Encode l'auteur pour éviter les caractères spéciaux
-        changefreq: "weekly", // La page change fréquemment
-        priority: 0.8, // Priorité relative (impossible de mettre 0.75 ou 0.85, car ca ve etre considéré comme 0.8 ou 0.9)
-      },
-      {
-        url: `/${encodeURIComponent(article.auteur)}/${article._id}`, //Utilisation de l'url et non la route /article
-        changefreq: "yearly", // La page change rarement
-        priority: 0.7, // Priorité relative pour expliquer au google bot comment classer les pages entre elles dans le site et la fréquence de crawl; mais ne garanti pas une meilleure position dans les résultats de recherches
-      },
-    ]);
+    //Je veux créer 1 seul et unique lien pour chaque page d'artiste et plusieurs liens pour chaque fiche tableau
+    const uniqueArtists = new Set(); // le Set est un tableau javascript qui ne prend pas les doublons par défaut. Grâce au set je pourrais conditionner l'ajout des url des page Artist pour qu'il n'y ait pas de doublons
+
+    //DynamicLinks sera un Array contenant tous les liens dynamiques pour toutes les pages artistes (une seule par auteur) et pour chaque fiche tableau (plusieurs par auteur).
+    //.flatmap: Comme on a des liens pour les pages Artists + liens pour ficheTableau; il permet d'applatir le résultat pour avoir un seul tableau, plutôt qu'un tableau contenant des sous-tableaux.
+    const dynamicLinks = articles.flatMap((article) => {
+      const links = []; //Une array vide se réinitialise pour chaque auteur et cette array Contiendra les dynamic Links crées
+
+      //Vérifie si le Set ne contient pas déjà le nom d'un auteur donné
+      if (!uniqueArtists.has(article.auteur)) {
+        //Si l'auteur n'existe pas dans le set, on ajoute le lien de la pageArtist de l'auteur dans l'array Links.
+        links.push({
+          url: `/pageArtist/${encodeURIComponent(article.auteur)}`,
+          changefreq: "weekly",
+          priority: 0.8,
+        });
+        uniqueArtists.add(article.auteur); // Au final, on rajoute cet auteur au set, pour qu'il ne soit pas traité plusieurs fois et que sa pageArtist ne soit pas rajoutée plusieurs fois au sitemap
+      }
+
+      // Ajouter l'URL pour la fiche tableau dans l'array Links
+      links.push({
+        url: `/${encodeURIComponent(article.auteur)}/${article._id}`,
+        changefreq: "yearly",
+        priority: 0.7,
+      });
+
+      return links; //permet de remplir dynamicLinks avec les liens de chaque auteur (avec un seul lien pour la page de l'artiste et plusieurs pour les fiches de tableaux), avant de passer à l'auteur suivant.
+    });
 
     // Combiner les liens dynamiques et statiques
     const allLinks = [...staticLinks, ...dynamicLinks];
