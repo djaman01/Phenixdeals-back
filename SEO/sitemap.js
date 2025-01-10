@@ -24,6 +24,7 @@ router.get("/sitemap.xml", async (req, res) => {
     // Liens pour les pages statiques: on dit statiques que leur url ne changent pas, même si pour certaines pages comme les pages accueil, artistes ou tableaux, leurs contenus changent régulièrement
     const staticLinks = [
       { url: "/", changefreq: "daily", priority: 1.0 },
+      { url: "/allArtists", changefreq: "weekly", priority: 0.8 },
       { url: "/concept", changefreq: "yearly", priority: 0.6 }
     ];
 
