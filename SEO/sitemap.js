@@ -22,7 +22,10 @@ router.get("/sitemap.xml", async (req, res) => {
     // Construction des liens: Crée un tableau contenant les URLs pour le sitemap et priority = importances des pages pour guider le robot google
 
     // Liens pour les pages statiques: on dit statiques que leur url ne changent pas, même si pour certaines pages comme les pages accueil, artistes ou tableaux, leurs contenus changent régulièrement
-    const staticLinks = [{ url: "/", changefreq: "daily", priority: 1.0 }];
+    const staticLinks = [
+      { url: "/", changefreq: "daily", priority: 1.0 },
+      { url: "/concept", changefreq: "yearly", priority: 0.6 }
+    ];
 
     // Liens pour les pages dynamiques: On dit dynamique car la fin de leur url change en fonction du nom de l'auteur ou de l'_id de l'article
     //Je veux créer 1 seul et unique lien pour chaque page d'artiste et plusieurs liens pour chaque fiche tableau
@@ -47,7 +50,7 @@ router.get("/sitemap.xml", async (req, res) => {
       // Ajouter l'URL pour la fiche tableau dans l'array Links
       links.push({
         url: `/${encodeURIComponent(article.auteur)}/${article._id}`,
-        changefreq: "yearly",
+        changefreq: "monthly",
         priority: 0.7,
       });
 
