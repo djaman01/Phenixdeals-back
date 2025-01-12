@@ -25,7 +25,9 @@ router.get("/sitemap.xml", async (req, res) => {
     const staticLinks = [
       { url: "/", changefreq: "daily", priority: 1.0 },
       { url: "/allArtists", changefreq: "weekly", priority: 0.8 },
-      { url: "/concept", changefreq: "yearly", priority: 0.6 }
+      { url: "/tableaux", changefreq: "weekly", priority: 0.6 },
+      { url: "/bestDeals", changefreq: "monthly", priority: 0.6 },
+      { url: "/concept", changefreq: "yearly", priority: 0.5 },
     ];
 
     // Liens pour les pages dynamiques: On dit dynamique car la fin de leur url change en fonction du nom de l'auteur ou de l'_id de l'article
