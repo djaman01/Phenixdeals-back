@@ -12,7 +12,7 @@ const verifyUser = (req, res, next) => {
     }
     //Si token existe dans le cookie: vérifier si role = admin
     jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
-      //decided = value du token (ici c'est l'email et el role)
+      //decoded = value du token (ici c'est l'email et le role)
       if (err) {
         return res.status(403).json({ error: "Invalid token" }); //error 403 = Authorisation refused by the server
       } 
