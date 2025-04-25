@@ -16,7 +16,7 @@ app.use(express.json()); //To parse incoming JSON data from HTTP requests, to Js
 app.use(
   cors({
     origin: [
-      "https://phenixdeals.com", // ✅ New official domain
+      "https://www.phenixdeals.com", // ✅ New official domain
       "https://www.phenix-deals.com", //For redirect or legacy users
       "https://phenixdeals-vite-n4qpkja68-djaman01s-projects.vercel.app" // Optional: Vercel preview
     ], // Here we Add all allowed front-end URLs
