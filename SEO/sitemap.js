@@ -69,7 +69,7 @@ router.get("/sitemap.xml", async (req, res) => {
 
     // Création du sitemap avec SitemapStream
     const stream = new SitemapStream({
-      hostname: "https://www.phenix-deals.com/",
+      hostname: "https://www.phenixdeals.com/",
     }); // Ton domaine principal
 
     //Création du sitemap final: Convertit le flux en une promesse pour obtenir le sitemap final.
