@@ -32,7 +32,10 @@ router.get("/allArtists", async (req, res) => {
       )
       .sort({ auteur: 1 });
 
+    // Utilisation du constructeur Set pour crée une array avec les noms des auteurs, SANS DOUBLONS ! Ainsi, même si j'ajoute plusieurs Kalmoun je n'aurais que 1 [Kalmoun]
     const uniqueArtists = [...new Set(allArticles.map((e) => e.auteur))];
+
+    // Transforme uniqueArtists = ["Kalmoun", "Gbouri"]; en un tableau d'objets en response=[{auteur:"Kalmoun"}, {auteur:"Gbouri"}], car le front-end en a besoin pour reconnaitre les valeurs grâce à la property auteur ex: {e.auteur}
     const response = uniqueArtists.map((e) => ({ auteur: e }));
 
     response.length
