@@ -22,20 +22,20 @@ router.get("/homeArticles", async (req, res) => {
 });
 
 // To GET unique artist names qui sont représenté par "auteur" (pour ne pas avoir de voublons quand on ajoute plusieurs fois un artiste dans al abse de donnée)
-router.get("/allArtists", async (req, res) => {
+rorouter.get("/allArtists", async (req, res) => {
   try {
-    // Récupère tous les documents
-    const allArticles = await postAllArticles //await = attend que .find soit terminée avant de continuer l'éxécution du code / c'est pourquoi on a fait async dans cette fonction car elle est asynchrone
-      .find({type:"Tableau"}, { auteur: 1, _id: 0 }) //On ne veut que les document de type "Tableau" + 2nd argument de .find est appelé projection: 1er paramètre= champ à inclure dans les résultats (car in ne veut fetch que le nom de l'artiste) + 2eme paramètre= champ à exclure des résultats /pour Limiter les données récupérés aux champs 'auteur' et améliorer la rapidité, même si après on va encore créer une collection qu'avec auteur et sans doublons
-      .sort({ auteur: 1 }); //Trie les documents par "auteur" et en ordre croissant
+    // Récupère tous les documents de type "Tableau", "Photographie" ou "Sculpture"
+    const allArticles = await postAllArticles
+      .find(
+        { type: { $in: ["Tableau", "Photographie", "Sculpture"] } }, //$in is a MongoDB operator that matches any value in the given array. = So, it'll return all articles whose type = one of those three values
+        { auteur: 1, _id: 0 }
+      )
+      .sort({ auteur: 1 });
 
-    // Utilisation du constructeur Set pour crée une array avec les noms des auteurs, SANS DOUBLONS ! Ainsi, même si j'ajoute plusieurs Kalmoun je n'aurais que 1 [Kalmoun]
     const uniqueArtists = [...new Set(allArticles.map((e) => e.auteur))];
-
-    // Transforme uniqueArtists = ["Kalmoun", "Gbouri"]; en un tableau d'objets en response=[{auteur:"Kalmoun"}, {auteur:"Gbouri"}], car le front-end en a besoin pour reconnaitre les valeurs grâce à la property auteur ex: {e.auteur}
     const response = uniqueArtists.map((e) => ({ auteur: e }));
 
-    response
+    response.length
       ? res.json(response)
       : res.status(404).json({ error: "Artists names not found" });
   } catch (error) {
