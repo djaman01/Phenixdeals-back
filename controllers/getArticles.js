@@ -22,7 +22,7 @@ router.get("/homeArticles", async (req, res) => {
 });
 
 // To GET unique artist names qui sont représenté par "auteur" (pour ne pas avoir de voublons quand on ajoute plusieurs fois un artiste dans al abse de donnée)
-rorouter.get("/allArtists", async (req, res) => {
+router.get("/allArtists", async (req, res) => {
   try {
     // Récupère tous les documents de type "Tableau", "Photographie" ou "Sculpture"
     const allArticles = await postAllArticles
