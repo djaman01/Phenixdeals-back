@@ -44,22 +44,21 @@ router.get("/allArtists", async (req, res) => {
   }
 });
 
-// Generalized function to get articles by type (Donner valeur à type dans router.get en-dessous)
-const getArticlesByType = async (type, res) => {
+//Route Handler to get all articles which type are either Tableau, Photographie or Sculpture
+router.get("/oeuvre", async (req, res) => {
   try {
-    const articles = await postAllArticles.find({ type }).sort({ _id: -1 });
-    articles
+    const articles = await postAllArticles.find({
+      type: { $in: ["Tableau", "Photographie", "Sculpture"] } //$in is a MongoDB operator that matches any value in the given array. = So, it'll return all articles whose type = one of those three values
+    }).sort({ _id: -1 });
+
+    articles.length
       ? res.json(articles)
       : res.status(404).json({ error: "Articles not found" });
   } catch (error) {
-    console.error(`Error fetching ${type} articles from the database:`, error);
+    console.error("Error fetching oeuvre articles from the database:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
-
-// Route to GET articles with type:'Tableau' / Avant j'avais les types Bijoux et Objets décorations: c'est pourquoi j'avais fait ce router.get pour /tableaux et /bijoux ..etc
-router.get("/tableaux", (req, res) => getArticlesByType("Tableau", res));
-
+});
 
 // To GET ALL articles with all types: ne peut pas ce joindre avec getArticleByType car tous les types inclus
 router.get("/allArticles", async (req, res) => {
