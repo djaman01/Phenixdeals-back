@@ -1,11 +1,13 @@
 const express = require("express");
 const app = express();
+
+require("dotenv").config(); //To use the environment variable had to be before any use of env variable to work
 const port = process.env.PORT;
 const db = require("./connect-db");
 const cors = require("cors");
 const cookieParser = require("cookie-parser"); //For the cookies to be parsed and available in req.cookies throughout the application, including in the verifyUser middleware.
 
-require("dotenv").config(); //To use the environment variable
+
 
 app.use(cookieParser()); // To parse cookies = Analyse and convert the cookies in a json format (Javascript Object Notation) so that it can be used in req.cookies, and then extract the token
 
@@ -16,13 +18,14 @@ app.use(express.json()); //To parse incoming JSON data from HTTP requests, to Js
 app.use(
   cors({
     origin: [
-      "https://www.phenixdeals.com", // ✅ New official domain
+      "http://localhost:5173", // ✅ To make it work locally
+      "https://www.phenixdeals.com", // New official domain
       "https://www.phenix-deals.com", //For redirect or legacy users
-      "https://phenixdeals-vite-n4qpkja68-djaman01s-projects.vercel.app" // Optional: Vercel preview
-    ], // Here we Add all allowed front-end URLs
-    methods: ["GET", "POST", "PUT", "DELETE"],
+      "https://phenixdeals-vite-n4qpkja68-djaman01s-projects.vercel.app", // Optional: Vercel preview
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"], // Here we Add all allowed front-end URLs
     credentials: true, // Allow cookies to be sent
-  })
+  }),
 );
 
 //!!!! Pour que les images s'envoie au front: Serve static files from the 'uploads' directory
