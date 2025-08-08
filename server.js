@@ -1,13 +1,11 @@
 const express = require("express");
 const app = express();
 
-require("dotenv").config(); //To use the environment variable had to be before any use of env variable to work
+require("dotenv").config({ path: ".env.local" }); //To use the environment variable, we have to place this line before any use of it
 const port = process.env.PORT;
 const db = require("./connect-db");
 const cors = require("cors");
 const cookieParser = require("cookie-parser"); //For the cookies to be parsed and available in req.cookies throughout the application, including in the verifyUser middleware.
-
-
 
 app.use(cookieParser()); // To parse cookies = Analyse and convert the cookies in a json format (Javascript Object Notation) so that it can be used in req.cookies, and then extract the token
 
