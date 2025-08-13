@@ -79,7 +79,7 @@ router.post("/logIn", async (req, res) => {
 
         return res.status(200).json({ status: "Success", role: user.role }); //200 = Request Succeeded
       } else {
-        //Si password n'est pas trouvé dans la database, on aura 'Invalid Credentials' dans la console
+        //Si password n'est pas trouvé dans la database, on aura 'Invalid credentials' dans la console !!!! Ne pas écrire autre chose que "Invalid credentials" car c'est ce qu'envoie par défaut l'error 401
         return res.status(401).json({ error: "Invalid credentials" });
       }
     } else {
