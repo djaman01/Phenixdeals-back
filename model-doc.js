@@ -31,12 +31,11 @@ const allArticles = mongoose.Schema(
 
   {
     timestamps: true, // Adds createdAt and updatedAt fields on the database
-  }
+  },
 );
 ////création modele : mongoose.model("collectionName", schema)
 //On le stock dans postAllArticles pour pouvoir l'exporter
 const postAllArticles = mongoose.model("allArticles", allArticles);
-
 
 // Slider schema
 const sliderSchema = mongoose.Schema(
@@ -45,14 +44,17 @@ const sliderSchema = mongoose.Schema(
       type: String,
       required: true, // from Cloudinary
     },
+    auteur: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const sliderModel = mongoose.model("sliders", sliderSchema);
-
 
 //Modèle for Sign up and Login
 
@@ -75,7 +77,7 @@ const loginSchema = mongoose.Schema(
 
   {
     timestamps: true,
-  }
+  },
 );
 //role= le role de l'utilsateur / visitor par défaut ou admin par exemple
 

@@ -131,7 +131,7 @@ router.get("/pageArtist/:auteur", async (req, res) => {
 router.get("/slider", async (req, res) => {
   try {
     const sliderImages = await sliderModel.find().sort({ createdAt: 1 }); //createdAt: 1 => Chaque image à une property createdAt et je met 1 pour que l'ordre d'apparition des images dans le diaporama, soit l'ordre d'ajout: De la plus ancienne ajoutée en 1er à la plus récente en dernier
-    res.json(sliderImages);
+    res.json(sliderImages); // Send all slider documents (image URL + auteur + timestamps) to the front-end
   } catch (error) {
     console.error("Error fetching slider images:", error);
     res.status(500).json({ error: "Error fetching slider images" });

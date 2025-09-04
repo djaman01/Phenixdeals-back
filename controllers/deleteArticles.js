@@ -4,7 +4,7 @@ const cloudinaryConfig = require('../cloudinary'); // Ensure you import your Clo
 const { postAllArticles, sliderModel } = require("../model-doc");
 
 
-//Delete an image from phenixArtciles folder on cloudinary
+//Delete an image from phenixArticles folder on cloudinary
 const deleteImageFromCloudinary = async (imageUrl) => {
   // Extract the public ID including the folder: le public id est le nombre juste avant .jpg de l'imageUrl dans la database mongoDBAtlas
   const publicId = `phenixArticles/${imageUrl.split('/').pop().split('.')[0]}`; 
@@ -32,7 +32,7 @@ router.delete('/deleteArticle/:articleId', async (req, res) => {
     const article = await postAllArticles.findById(articleId);
 
     if (article) {
-      // Si l'article a une image associée, la supprimer de Cloudinary
+      // Si l'article a une image associée, la supprimer de Cloudinary grâce à la function créee précedemment
       if (article.imageUrl) {
         await deleteImageFromCloudinary(article.imageUrl);
       }
@@ -79,7 +79,7 @@ router.delete('/deleteSliderImage/:imageId', async (req, res) => {
     const image = await sliderModel.findById(imageId);
 
     if (image) {
-      // Si on trouve l'image, la supprimer de Cloudinary
+      // Si on trouve l'image, la supprimer de Cloudinary grâce à la function crée précedemment
       if (image.imageUrl) {
         await deleteSliderFromCloudinary(image.imageUrl);
       }
