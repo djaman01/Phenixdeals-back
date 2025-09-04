@@ -3,7 +3,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { postAllArticles } = require("../model-doc");
+const { postAllArticles, sliderModel } = require("../model-doc");
 
 //To GET the last 20 articles on the HomePage-----------
 router.get("/homeArticles", async (req, res) => {
@@ -28,7 +28,7 @@ router.get("/allArtists", async (req, res) => {
     const allArticles = await postAllArticles
       .find(
         { type: { $in: ["Tableau", "Photographie", "Sculpture"] } }, //$in is a MongoDB operator that matches any value in the given array. = So, it'll return all articles whose type = one of those three values
-        { auteur: 1, _id: 0 }
+        { auteur: 1, _id: 0 },
       )
       .sort({ auteur: 1 });
 
@@ -50,9 +50,11 @@ router.get("/allArtists", async (req, res) => {
 //Route Handler to get all articles which type are either Tableau, Photographie or Sculpture
 router.get("/oeuvre", async (req, res) => {
   try {
-    const articles = await postAllArticles.find({
-      type: { $in: ["Tableau", "Photographie", "Sculpture"] } //$in is a MongoDB operator that matches any value in the given array. = So, it'll return all articles whose type = one of those three values
-    }).sort({ _id: -1 });
+    const articles = await postAllArticles
+      .find({
+        type: { $in: ["Tableau", "Photographie", "Sculpture"] }, //$in is a MongoDB operator that matches any value in the given array. = So, it'll return all articles whose type = one of those three values
+      })
+      .sort({ _id: -1 });
 
     articles.length
       ? res.json(articles)
@@ -80,12 +82,17 @@ router.get("/allArticles", async (req, res) => {
 // To GET only articles with bestDeal = "Yes"
 router.get("/bestDeals", async (req, res) => {
   try {
-    const bestArticles = await postAllArticles.find({ bestDeal: "Yes" }).sort({ _id: -1 });
+    const bestArticles = await postAllArticles
+      .find({ bestDeal: "Yes" })
+      .sort({ _id: -1 });
     bestArticles
       ? res.json(bestArticles)
       : res.status(404).json({ error: "No best deal articles found" });
   } catch (error) {
-    console.error("Error fetching best deal articles from the database:", error);
+    console.error(
+      "Error fetching best deal articles from the database:",
+      error,
+    );
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -108,8 +115,8 @@ router.get("/article/:articleId", async (req, res) => {
 //To GET toutes les oeuvres d'un artiste spécifique pour PageArtiste.jsx
 router.get("/pageArtist/:auteur", async (req, res) => {
   try {
-    const auteur = req.params.auteur; 
-    const oeuvreAuteur = await postAllArticles.find({auteur:auteur});
+    const auteur = req.params.auteur;
+    const oeuvreAuteur = await postAllArticles.find({ auteur: auteur });
 
     oeuvreAuteur
       ? res.json(oeuvreAuteur)
@@ -117,6 +124,17 @@ router.get("/pageArtist/:auteur", async (req, res) => {
   } catch (error) {
     console.error("Error fetching the oeuvres from the database:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// GET all slider images
+router.get("/slider", async (req, res) => {
+  try {
+    const sliderImages = await sliderModel.find().sort({ createdAt: 1 }); //createdAt: 1 => Chaque image à une property createdAt et je met 1 pour que l'ordre d'apparition des images dans le diaporama, soit l'ordre d'ajout: De la plus ancienne ajoutée en 1er à la plus récente en dernier
+    res.json(sliderImages);
+  } catch (error) {
+    console.error("Error fetching slider images:", error);
+    res.status(500).json({ error: "Error fetching slider images" });
   }
 });
 

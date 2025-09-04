@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-//création d'un schema mongoose = structure "document", dans "collection" de la database "phenixArticles" dans MongoDB
+//création d'un schema mongoose = structure "document", dans "collection" de la database "phenixArticles" dans MongoDB => Dans connect-db.js, on l'a connecté à la bonne database grace à la variable uri (voir .env file)
 const allArticles = mongoose.Schema(
   {
     type: {
@@ -37,6 +37,23 @@ const allArticles = mongoose.Schema(
 //On le stock dans postAllArticles pour pouvoir l'exporter
 const postAllArticles = mongoose.model("allArticles", allArticles);
 
+
+// Slider schema
+const sliderSchema = mongoose.Schema(
+  {
+    imageUrl: {
+      type: String,
+      required: true, // from Cloudinary
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const sliderModel = mongoose.model("sliders", sliderSchema);
+
+
 //Modèle for Sign up and Login
 
 const loginSchema = mongoose.Schema(
@@ -64,4 +81,4 @@ const loginSchema = mongoose.Schema(
 
 const loginModel = mongoose.model("logins", loginSchema);
 
-module.exports = { postAllArticles, loginModel }; //Exportation et Destructuration de la variable pour pouvoir utilisé sa valeur en écrivant son nom
+module.exports = { postAllArticles, loginModel, sliderModel }; //Exportation et Destructuration de la variable pour pouvoir utilisé sa valeur en écrivant son nom
