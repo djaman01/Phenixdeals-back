@@ -98,10 +98,10 @@ router.get("/bestDeals", async (req, res) => {
 });
 
 //To GET 1 product for ficheTableau.jsx in the front-end
-router.get("/article/:articleId", async (req, res) => {
+router.get("/article/:code", async (req, res) => {
   try {
-    const articleId = req.params.articleId; //On extrait le paramètre dynamique définit dans l'url et qui est = _id, et on le store dans la variable articleId
-    const article = await postAllArticles.findById(articleId); //On cherche 1 produit spécifique grâce à _id extrait du paramètre de l'url et stocké dans la variable articleId
+    const code = req.params.code; //On extrait le paramètre dynamique définit dans l'url
+    const article = await postAllArticles.findOne({ code: code }); //On cherche 1 produit spécifique grâce à _id extrait du paramètre de l'url et stocké dans la variable articleId
 
     article
       ? res.json(article)
