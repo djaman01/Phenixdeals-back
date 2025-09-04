@@ -71,10 +71,11 @@ router.post("/slider", async (req, res) => {
       { folder: "phenixSlider" }, // creating a separate folder for slider's images
     );
 
-    // Create a new document in the MongoDB database with the image values and the auteur name sent from the front-end request
+    // Create a new document in the MongoDB database with the image values and the auteur name sent from the front-end request dans le formData créé
     const newSliderImage = await sliderModel.create({
       imageUrl: cloudinaryResult.secure_url,
       auteur: req.body.auteur,
+      code: req.body.code,
     });
 
     res.json(newSliderImage);

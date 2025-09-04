@@ -48,6 +48,10 @@ const sliderSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    code: { //j'ai ajouté auteur et code pour pouvoir avoir un lien vers la fiche du tableau dont l'url se termine par /auteur/code
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
