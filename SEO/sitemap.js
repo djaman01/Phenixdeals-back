@@ -17,7 +17,7 @@ router.get("/sitemap.xml", async (req, res) => {
 
     // On store notre modèle avec les properties dans la variable articles // .find({}): Récupère tous les articles dans la base de données "code": Mais que le champ "code" pour éviter trop de données
     // Retourne des objets JavaScript simples pour optimiser les performances pour la lecture
-    const articles = await postAllArticles.find({}, "auteur _id").lean(); //pas de , entre auteur et _id car ce n'est pas une array, mais une chaine de carctère avec une liste de champs séparés par des espaces
+    const articles = await postAllArticles.find({}, "auteur code").lean(); //pas de , entre auteur et code car ce n'est pas une array, mais une chaine de carctère avec une liste de champs séparés par des espaces
 
     // Construction des liens: Crée un tableau contenant les URLs pour le sitemap et priority = importances des pages pour guider le robot google
 
@@ -52,7 +52,7 @@ router.get("/sitemap.xml", async (req, res) => {
 
       // Ajouter l'URL pour la fiche tableau dans l'array Links
       links.push({
-        url: `/${encodeURIComponent(article.auteur)}/${article._id}`,
+        url: `/${encodeURIComponent(article.auteur)}/${article.code}`,
         changefreq: "monthly",
         priority: 0.7,
       });
