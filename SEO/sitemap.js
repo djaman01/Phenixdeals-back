@@ -25,7 +25,7 @@ router.get("/sitemap.xml", async (req, res) => {
     const staticLinks = [
       { url: "/", changefreq: "daily", priority: 1.0 },
       { url: "/allArtists", changefreq: "weekly", priority: 0.8 },
-      { url: "/tableaux", changefreq: "weekly", priority: 0.8 },
+      { url: "/oeuvres", changefreq: "weekly", priority: 0.8 },
       { url: "/bestDeals", changefreq: "monthly", priority: 0.6 },
       { url: "/concept", changefreq: "yearly", priority: 0.6 },
     ];

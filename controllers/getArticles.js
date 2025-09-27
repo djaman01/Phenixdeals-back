@@ -48,7 +48,7 @@ router.get("/allArtists", async (req, res) => {
 });
 
 //Route Handler to get all articles which type are either Tableau, Photographie or Sculpture
-router.get("/oeuvre", async (req, res) => {
+router.get("/oeuvres", async (req, res) => {
   try {
     const articles = await postAllArticles
       .find({
