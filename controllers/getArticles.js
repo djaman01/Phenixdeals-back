@@ -50,23 +50,6 @@ router.get("/allArtists", async (req, res) => {
 //Route Handler to get all articles which type are either Tableau, Photographie or Sculpture
 router.get("/oeuvres", async (req, res) => {
   try {
-    const articles = await postAllArticles
-      .find({
-        type: { $in: ["Tableau", "Photographie", "Sculpture"] }, //$in is a MongoDB operator that matches any value in the given array. = So, it'll return all articles whose type = one of those three values
-      })
-      .sort({ _id: -1 });
-
-    articles.length
-      ? res.json(articles)
-      : res.status(404).json({ error: "Articles not found" });
-  } catch (error) {
-    console.error("Error fetching oeuvre articles from the database:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-router.get("/oeuvres", async (req, res) => {
-  try {
     const { prixMin, prixMax } = req.query;
 
     const min = prixMin ? Number(prixMin) : 0;
