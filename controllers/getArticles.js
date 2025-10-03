@@ -50,17 +50,45 @@ router.get("/allArtists", async (req, res) => {
 //Route Handler to get all articles which type are either Tableau, Photographie or Sculpture
 router.get("/oeuvres", async (req, res) => {
   try {
-    const articles = await postAllArticles
-      .find({
-        type: { $in: ["Tableau", "Photographie", "Sculpture"] }, //$in is a MongoDB operator that matches any value in the given array. = So, it'll return all articles whose type = one of those three values
-      })
-      .sort({ _id: -1 });
+    const { prixMin, prixMax} = req.query;
 
-    articles.length
-      ? res.json(articles)
-      : res.status(404).json({ error: "Articles not found" });
+    const min = prixMin ? Number(prixMin) : 0;
+    const max = prixMax ? Number(prixMax) : 999999999;
+
+    const articles = await postAllArticles.aggregate([
+      {
+        $match: {
+          type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+          prix: { $regex: "\\d" }, // Keep only prix that contain digits
+        },
+      },
+      {
+        $addFields: {
+          numericPrice: {
+            $toDouble: {
+              $replaceAll: {
+                input: {
+                  $replaceAll: { input: "$prix", find: "Dhs", replacement: "" },
+                },
+                find: " ",
+                replacement: "",
+              },
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          numericPrice: { $gte: min, $lte: max },
+        },
+      },
+      { $sort: { numericPrice: 1 } }, // Sort ascending by price
+
+    ]);
+
+    res.json(articles);
   } catch (error) {
-    console.error("Error fetching oeuvre articles from the database:", error);
+    console.error("Error fetching oeuvre articles:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
