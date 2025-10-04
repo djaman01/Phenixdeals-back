@@ -47,19 +47,41 @@ router.get("/allArtists", async (req, res) => {
   }
 });
 
-//Route Handler to get all articles which type are either Tableau, Photographie or Sculpture
-router.get("/oeuvres", async (req, res) => {
+// 1️⃣ Route: Fetch ALL oeuvres (no filter, no pagination)
+router.get("/allOeuvres", async (req, res) => {
   try {
-    const { prixMin, prixMax} = req.query;
+    const articles = await postAllArticles
+      .find({
+        type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+        $or: [
+          { prix: { $regex: "\\d" } }, // keep anything with digits
+          { prix: "Prix sur Demande" }, // keep exactly "Prix sur Demande"
+        ],
+        prix: { $ne: "Vendu" }, // exclude "Vendu"
+      })
+      .sort({ _id: -1 }); // newest first;
+
+    res.json(articles);
+  } catch (error) {
+    console.error("Error fetching all oeuvres:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// 2️⃣ Route: Fetch oeuvres with serverside Filtering + PAGINATION
+router.get("/filterOeuvres", async (req, res) => {
+  try {
+    const { prixMin, prixMax, page = 1, limit = 40 } = req.query;
 
     const min = prixMin ? Number(prixMin) : 0;
     const max = prixMax ? Number(prixMax) : 999999999;
+    const skip = (Number(page) - 1) * Number(limit);
 
     const articles = await postAllArticles.aggregate([
       {
         $match: {
           type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-          prix: { $regex: "\\d" }, // Keep only prix that contain digits
+          prix: { $regex: "\\d" },
         },
       },
       {
@@ -82,13 +104,14 @@ router.get("/oeuvres", async (req, res) => {
           numericPrice: { $gte: min, $lte: max },
         },
       },
-      { $sort: { numericPrice: 1 } }, // Sort ascending by price
-
+      { $sort: { numericPrice: 1 } },
+      { $skip: skip },
+      { $limit: Number(limit) },
     ]);
 
     res.json(articles);
   } catch (error) {
-    console.error("Error fetching oeuvre articles:", error);
+    console.error("Error filtering oeuvres:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
