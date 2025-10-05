@@ -116,19 +116,6 @@ router.get("/filterOeuvres", async (req, res) => {
   }
 });
 
-// To GET ALL articles with all types: ne peut pas ce joindre avec getArticleByType car tous les types inclus
-router.get("/allArticles", async (req, res) => {
-  try {
-    const allArticles = await postAllArticles.find().sort({ _id: -1 });
-
-    allArticles
-      ? res.json(allArticles)
-      : res.status(404).json({ error: "Articles not found" });
-  } catch (error) {
-    console.error("Error fetching articles from the database:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
 
 // To GET only articles with bestDeal = "Yes"
 router.get("/bestDeals", async (req, res) => {
