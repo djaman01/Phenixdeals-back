@@ -21,6 +21,22 @@ router.get("/homeArticles", async (req, res) => {
   }
 });
 
+// GET all articles for the DashBoard (newest first)
+router.get("/allArticles", async (req, res) => {
+  try {
+    const allArticles = await postAllArticles.find().sort({ _id: -1 });
+
+    if (!allArticles || allArticles.length === 0) {
+      return res.status(404).json({ error: "No articles found" });
+    }
+
+    res.json(allArticles);
+  } catch (error) {
+    console.error("Error fetching articles:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // To GET unique artist names qui sont représenté par "auteur" (pour ne pas avoir de voublons quand on ajoute plusieurs fois un artiste dans al abse de donnée)
 router.get("/allArtists", async (req, res) => {
   try {
@@ -115,7 +131,6 @@ router.get("/filterOeuvres", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 // To GET only articles with bestDeal = "Yes"
 router.get("/bestDeals", async (req, res) => {
