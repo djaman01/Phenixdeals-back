@@ -62,20 +62,21 @@ router.get("/allArtists", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-// 1️⃣ Route: Fetch ALL oeuvres (no filter, no pagination)
 router.get("/allOeuvres", async (req, res) => {
   try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 40;
+    const skip = (page - 1) * limit; //Pour skip les 40 dejà fetch et ne aps dupliquer
+
     const articles = await postAllArticles
       .find({
         type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-        $or: [
-          { prix: { $regex: "\\d" } }, // keep anything with digits
-          { prix: "Prix sur Demande" }, // keep exactly "Prix sur Demande"
-        ],
-        prix: { $ne: "Vendu" }, // exclude "Vendu"
+        $or: [{ prix: { $regex: "\\d" } }, { prix: "Prix sur Demande" }],
+        prix: { $ne: "Vendu" },
       })
-      .sort({ _id: -1 }); // newest first;
+      .sort({ _id: -1 })
+      .skip(skip)
+      .limit(limit);
 
     res.json(articles);
   } catch (error) {
@@ -87,11 +88,10 @@ router.get("/allOeuvres", async (req, res) => {
 // 2️⃣ Route: Fetch oeuvres with serverside Filtering + PAGINATION
 router.get("/filterOeuvres", async (req, res) => {
   try {
-    const { prixMin, prixMax, page = 1, limit = 40 } = req.query;
+    const { prixMin, prixMax} = req.query;
 
     const min = prixMin ? Number(prixMin) : 0;
     const max = prixMax ? Number(prixMax) : 999999999;
-    const skip = (Number(page) - 1) * Number(limit);
 
     const articles = await postAllArticles.aggregate([
       {
@@ -121,8 +121,6 @@ router.get("/filterOeuvres", async (req, res) => {
         },
       },
       { $sort: { numericPrice: 1 } },
-      { $skip: skip },
-      { $limit: Number(limit) },
     ]);
 
     res.json(articles);
