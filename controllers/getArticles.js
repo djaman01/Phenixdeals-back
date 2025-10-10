@@ -65,8 +65,8 @@ router.get("/allArtists", async (req, res) => {
 router.get("/allOeuvres", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 40;
-    const skip = (page - 1) * limit; //Pour skip les 40 dejà fetch et ne aps dupliquer
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne aps dupliquer
 
     const articles = await postAllArticles
       .find({
