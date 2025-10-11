@@ -62,6 +62,7 @@ router.get("/allArtists", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 router.get("/allOeuvres", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -85,13 +86,17 @@ router.get("/allOeuvres", async (req, res) => {
   }
 });
 
-// 2️⃣ Route: Fetch oeuvres with serverside Filtering + PAGINATION
+// Route: Fetch oeuvres with serverside Filtering + PAGINATION
 router.get("/filterOeuvres", async (req, res) => {
   try {
-    const { prixMin, prixMax} = req.query;
+    const { prixMin, prixMax } = req.query;
 
     const min = prixMin ? Number(prixMin) : 0;
     const max = prixMax ? Number(prixMax) : 999999999;
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne aps dupliquer
 
     const articles = await postAllArticles.aggregate([
       {
@@ -121,6 +126,8 @@ router.get("/filterOeuvres", async (req, res) => {
         },
       },
       { $sort: { numericPrice: 1 } },
+      { $skip: skip }, // <-- Pagination: skip documents
+      { $limit: limit }, // <-- Pagination: limit number of documents
     ]);
 
     res.json(articles);
