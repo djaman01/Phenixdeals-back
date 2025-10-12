@@ -91,6 +91,7 @@ router.get("/filterOeuvres", async (req, res) => {
   try {
     const { prixMin, prixMax } = req.query;
 
+    //Pour changer les strings "3000" reçu du front-end en valeur numérique / : 0 et : 999999 => valeur par défaut de l'input si l'utilisateur n'écrit qu'un prix min ou qu'un prix max
     const min = prixMin ? Number(prixMin) : 0;
     const max = prixMax ? Number(prixMax) : 999999999;
 
@@ -98,11 +99,12 @@ router.get("/filterOeuvres", async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne aps dupliquer
 
+    //.agreggate([]) est une méthode Mongoose qui permet d'executer un .find() mais avec plusieurs conditions (donc pour permettre de filtrer)
     const articles = await postAllArticles.aggregate([
       {
         $match: {
           type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-          prix: { $regex: "\\d" },
+          prix: { $regex: "\\d" }, //Match any string that contains a digit (0-9) so it excludes the one without digits
         },
       },
       {
@@ -140,9 +142,16 @@ router.get("/filterOeuvres", async (req, res) => {
 // To GET only articles with bestDeal = "Yes"
 router.get("/bestDeals", async (req, res) => {
   try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 4;
+    const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne pas dupliquer
+
     const bestArticles = await postAllArticles
       .find({ bestDeal: "Yes" })
-      .sort({ _id: -1 });
+      .sort({ _id: -1 })
+      .skip(skip)
+      .limit(limit);
+
     bestArticles
       ? res.json(bestArticles)
       : res.status(404).json({ error: "No best deal articles found" });
@@ -151,6 +160,58 @@ router.get("/bestDeals", async (req, res) => {
       "Error fetching best deal articles from the database:",
       error,
     );
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.get("/filterBestDeals", async (req, res) => {
+  try {
+    const { prixMin, prixMax } = req.query;
+
+    const min = prixMin ? Number(prixMin) : 0;
+    const max = prixMax ? Number(prixMax) : 999999999;
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 4;
+    const skip = (page - 1) * limit;
+
+    // Build the match object dynamically
+    const match = {
+      type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+      prix: { $regex: "\\d" },
+      bestDeal: "Yes", //To apply the filter only with artciels that are bestDeals
+    };
+
+    const articles = await postAllArticles.aggregate([
+      { $match: match },
+      {
+        $addFields: {
+          numericPrice: {
+            $toDouble: {
+              $replaceAll: {
+                input: {
+                  $replaceAll: { input: "$prix", find: "Dhs", replacement: "" },
+                },
+                find: " ",
+                replacement: "",
+              },
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          numericPrice: { $gte: min, $lte: max },
+        },
+      },
+      { $sort: { numericPrice: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+    ]);
+
+    res.json(articles);
+  } catch (error) {
+    console.error("Error filtering oeuvres:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
