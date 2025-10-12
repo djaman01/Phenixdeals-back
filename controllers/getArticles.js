@@ -172,7 +172,7 @@ router.get("/filterBestDeals", async (req, res) => {
     const max = prixMax ? Number(prixMax) : 999999999;
 
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 4;
+    const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
 
     // Build the match object dynamically
