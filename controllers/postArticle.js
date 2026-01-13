@@ -33,13 +33,23 @@ router.post("/upload", async (req, res) => {
     );
 
     // Extract the other product data sent from the front-end
-    const { type, auteur, infoArticle, prix, etat, bestDeal, code } = req.body;
+    const {
+      type,
+      auteur,
+      infoArticle,
+      allDescription,
+      prix,
+      etat,
+      bestDeal,
+      code,
+    } = req.body;
 
     // Create a new product in the database with the received info and the image URL as values
     const newArticle = await postAllArticles.create({
       type,
       auteur,
       infoArticle,
+      allDescription,
       prix,
       etat,
       code,

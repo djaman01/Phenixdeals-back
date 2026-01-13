@@ -12,6 +12,10 @@ const allArticles = mongoose.Schema(
     infoArticle: {
       type: String,
     },
+    allDescription: {
+      type: String,
+      default: "", // <-- important because i've created this column after adding the products, so it can't be undefined
+    },
     prix: {
       type: String,
     },
@@ -48,7 +52,8 @@ const sliderSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    code: { //j'ai ajouté auteur et code pour pouvoir avoir un lien vers la fiche du tableau dont l'url se termine par /auteur/code
+    code: {
+      //j'ai ajouté auteur et code pour pouvoir avoir un lien vers la fiche du tableau dont l'url se termine par /auteur/code
       type: String,
       required: true,
     },
