@@ -178,7 +178,6 @@ router.get("/filterBestDeals", async (req, res) => {
     // Build the match object dynamically
     const match = {
       type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-      prix: { $regex: "\\d" },
       bestDeal: "Yes", //To apply the filter only with artciels that are bestDeals
     };
 
@@ -231,17 +230,130 @@ router.get("/article/:code", async (req, res) => {
   }
 });
 
-//To GET toutes les oeuvres d'un artiste spécifique pour PageArtiste.jsx
 router.get("/pageArtist/:auteur", async (req, res) => {
   try {
     const auteur = req.params.auteur;
-    const oeuvreAuteur = await postAllArticles.find({ auteur: auteur });
 
-    oeuvreAuteur
-      ? res.json(oeuvreAuteur)
-      : res.status(404).json({ error: "Oeuvres not found" });
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const skip = (page - 1) * limit;
+
+    const hasPriceFilter = req.query.prixMin || req.query.prixMax;
+    const min = req.query.prixMin ? Number(req.query.prixMin) : 0;
+    const max = req.query.prixMax ? Number(req.query.prixMax) : Infinity;
+
+    const pipeline = [
+      {
+        $match: {
+          auteur,
+          type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+        },
+      },
+    ];
+
+    // Only add price logic IF filtering is active
+    if (hasPriceFilter) {
+      pipeline.push(
+        {
+          $addFields: {
+            numericPrice: {
+              $cond: [
+                { $regexMatch: { input: "$prix", regex: "\\d" } },
+                {
+                  $toDouble: {
+                    $replaceAll: {
+                      input: {
+                        $replaceAll: {
+                          input: "$prix",
+                          find: "Dhs",
+                          replacement: "",
+                        },
+                      },
+                      find: " ",
+                      replacement: "",
+                    },
+                  },
+                },
+                null,
+              ],
+            },
+          },
+        },
+        {
+          $match: {
+            numericPrice: { $gte: min, $lte: max },
+          },
+        },
+        { $sort: { numericPrice: 1 } },
+      );
+    } else {
+      // Normal infinite scroll (newest first)
+      pipeline.push({ $sort: { _id: -1 } });
+    }
+
+    pipeline.push({ $skip: skip }, { $limit: limit });
+
+    const articles = await postAllArticles.aggregate(pipeline);
+
+    res.json(articles);
   } catch (error) {
-    console.error("Error fetching the oeuvres from the database:", error);
+    console.error("Error fetching artist oeuvres:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+//To GET toutes les oeuvres d'un artiste spécifique pour PageArtiste.jsx, avec infinite scroll si + de 20 oeuvres
+router.get("/pageArtist/:auteur", async (req, res) => {
+  try {
+    const auteur = req.params.auteur;
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne pas dupliquer
+
+    const min = req.query.prixMin ? Number(req.query.prixMin) : 0;
+    const max = req.query.prixMax ? Number(req.query.prixMax) : 999999999;
+
+    const articles = await postAllArticles.aggregate([
+      {
+        $match: {
+          auteur,
+          type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+        },
+      },
+      {
+        $addFields: {
+          numericPrice: {
+            $toDouble: {
+              $replaceAll: {
+                input: {
+                  $replaceAll: {
+                    input: "$prix",
+                    find: "Dhs",
+                    replacement: "",
+                  },
+                },
+                find: " ",
+                replacement: "",
+              },
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          numericPrice: { $gte: min, $lte: max },
+        },
+      },
+      { $sort: { numericPrice: 1 } }, // sort by price
+      { $skip: skip },
+      { $limit: limit },
+    ]);
+
+    res.json(articles);
+  } catch (error) {
+    console.error("Error fetching artist oeuvres:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
