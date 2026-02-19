@@ -24,8 +24,8 @@ router.get("/sitemap.xml", async (req, res) => {
     // Liens pour les pages statiques: on dit statiques que leur url ne changent pas, même si pour certaines pages comme les pages accueil, artistes ou tableaux, leurs contenus changent régulièrement
     const staticLinks = [
       { url: "/", changefreq: "daily", priority: 1.0 },
-      { url: "/allArtists", changefreq: "weekly", priority: 0.8 },
-      { url: "/oeuvres", changefreq: "weekly", priority: 0.8 },
+      { url: "/allArtists", changefreq: "weekly", priority: 0.7 },
+      { url: "/oeuvres", changefreq: "weekly", priority: 0.7 },
       { url: "/bestDeals", changefreq: "monthly", priority: 0.6 },
       { url: "/concept", changefreq: "yearly", priority: 0.6 },
     ];
@@ -45,7 +45,7 @@ router.get("/sitemap.xml", async (req, res) => {
         links.push({
           url: `/pageArtist/${encodeURIComponent(article.auteur)}`,
           changefreq: "weekly",
-          priority: 0.8,
+          priority: 0.9,
         });
         uniqueArtists.add(article.auteur); // Au final, on rajoute cet auteur au set, pour qu'il ne soit pas traité plusieurs fois et que sa pageArtist ne soit pas rajoutée plusieurs fois au sitemap
       }
@@ -54,7 +54,7 @@ router.get("/sitemap.xml", async (req, res) => {
       links.push({
         url: `/${encodeURIComponent(article.auteur)}/${article.code}`,
         changefreq: "monthly",
-        priority: 0.7,
+        priority: 0.8,
       });
 
       return links; //permet de remplir dynamicLinks avec les liens de chaque auteur (avec un seul lien pour la page de l'artiste et plusieurs pour les fiches de tableaux), avant de passer à l'auteur suivant.
