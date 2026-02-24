@@ -158,7 +158,7 @@ router.get("/filterOeuvres", async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne aps dupliquer
 
-    //.agreggate([]) returns plain JS OBject so no need to add .lean() / .aggregate est une méthode Mongoose qui permet d'executer un .find() mais avec plusieurs conditions (donc pour permettre de filtrer)
+    //.aggregate([]) returns plain JS OBject so no need to add .lean() / .aggregate est une méthode Mongoose qui permet d'executer un .find() mais avec plusieurs conditions (donc pour permettre de filtrer)
     const articles = await postAllArticles.aggregate([
       {
         $match: {
@@ -241,28 +241,52 @@ router.get("/filterBestDeals", async (req, res) => {
     };
 
     const articles = await postAllArticles.aggregate([
-      { $match: match },
+      {
+        $match: {
+          auteur,
+          type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+        },
+      },
       {
         $addFields: {
           numericPrice: {
-            $toDouble: {
-              $replaceAll: {
-                input: {
-                  $replaceAll: { input: "$prix", find: "Dhs", replacement: "" },
+            $convert: {
+              input: {
+                $replaceAll: {
+                  input: {
+                    $replaceAll: {
+                      input: "$prix",
+                      find: "Dhs",
+                      replacement: "",
+                    },
+                  },
+                  find: " ",
+                  replacement: "",
                 },
-                find: " ",
-                replacement: "",
               },
+              to: "double",
+              onError: null,
+              onNull: null,
             },
           },
         },
       },
       {
         $match: {
-          numericPrice: { $gte: min, $lte: max },
+          $or: [
+            { numericPrice: { $gte: min, $lte: max } },
+            { prix: { $in: ["Vendu", "Prix sur Demande"] } },
+          ],
         },
       },
-      { $sort: { numericPrice: 1 } },
+      {
+        $addFields: {
+          sortOrder: {
+            $cond: [{ $eq: ["$numericPrice", null] }, 1, 0],
+          },
+        },
+      },
+      { $sort: { sortOrder: 1, numericPrice: 1 } },
       { $skip: skip },
       { $limit: limit },
     ]);
@@ -305,7 +329,7 @@ router.get("/pageArtist/:auteur", async (req, res) => {
 
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;
-    const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne pas dupliquer
+    const skip = (page - 1) * limit;
 
     const min = req.query.prixMin ? Number(req.query.prixMin) : 0;
     const max = req.query.prixMax ? Number(req.query.prixMax) : 999999999;
@@ -320,28 +344,43 @@ router.get("/pageArtist/:auteur", async (req, res) => {
       {
         $addFields: {
           numericPrice: {
-            $toDouble: {
-              $replaceAll: {
-                input: {
-                  $replaceAll: {
-                    input: "$prix",
-                    find: "Dhs",
-                    replacement: "",
+            $convert: {
+              input: {
+                $replaceAll: {
+                  input: {
+                    $replaceAll: {
+                      input: "$prix",
+                      find: "Dhs",
+                      replacement: "",
+                    },
                   },
+                  find: " ",
+                  replacement: "",
                 },
-                find: " ",
-                replacement: "",
               },
+              to: "double",
+              onError: null,
+              onNull: null,
             },
           },
         },
       },
       {
         $match: {
-          numericPrice: { $gte: min, $lte: max },
+          $or: [
+            { numericPrice: { $gte: min, $lte: max } },
+            { prix: { $in: ["Vendu", "Prix sur Demande"] } },
+          ],
         },
       },
-      { $sort: { numericPrice: 1 } }, // sort by price
+      {
+        $addFields: {
+          sortOrder: {
+            $cond: [{ $eq: ["$numericPrice", null] }, 1, 0],
+          },
+        },
+      },
+      { $sort: { sortOrder: 1, numericPrice: 1 } },
       { $skip: skip },
       { $limit: limit },
     ]);
@@ -354,7 +393,6 @@ router.get("/pageArtist/:auteur", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 // GET all slider images
 router.get("/slider", async (req, res) => {
   try {
