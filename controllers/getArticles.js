@@ -5,16 +5,64 @@ const router = express.Router();
 
 const { postAllArticles, sliderModel } = require("../model-doc");
 
+const cloudinaryConfig = require("../cloudinary");
+
+//Function used to resize images from cloudinary: so that we send to the front-end: small images for card grids, and original images for fiche tableau and improve the performances of the website
+//The value of the parameter will be an article in the database with all it's properties (type, imagePublicId, description...)
+const formatArticleImage = (article) => {
+  if (!article) return article; //return article instead of just return, so that we'll have null instead of undefined if no article in the value of the parameter
+
+  //use the stored publicID of the cloudinary URL if available, else extract it from the old property imageUrl
+  const publicId =
+    article.imagePublicId ||
+    (article.imageUrl
+      ? article.imageUrl
+          .split("/upload/")[1] // split l'url du dossier ou se situe l'image en 2 ["https://res.cloudinary.com/phenixdeals/image", "v1769872586/phenixSlider/dzz867q2zbafudwclss2.jpg"] / [1] permet de cibler la 2eme partie de l'url du dossier
+          .split(".")[0] //Removes .jpg
+          .replace(/^v\d+\//, "") //removes v1769872586/ => so that the final result will be nameOfFolder/pulicID which is the correct publicId ex: phenixSlider/dzz867q2zbafudwclss2
+      : null);
+
+  if (!publicId) return article;
+
+  return {
+    ...article, //keep all original properties of each article + add 2 new properties imageCard (Small images that we'll use for card grid) and imageOriginal (big image that we'll use for fiche tableau)
+    imageCard: cloudinaryConfig.url(publicId, {
+      width: 600, //To decide how much px, we see the width of the element that receive the image and we multiply it by 2 (here it's 287px with x 2 so 574px => 600px)
+      quality: "auto",
+      fetch_format: "auto",
+    }),
+    imageOriginal: cloudinaryConfig.url(publicId, {
+      width: 1500, //To decide how much px, we see the width of the element that receive the image and we multiply it by 2 (here it's 720px with x 2 so 1440px => 1500px
+      crop: "limit", //Do not crop and keep aspect ratio
+      quality: "auto",
+      fetch_format: "auto",
+    }),
+    imageSlider: cloudinaryConfig.url(publicId, {
+      width: 1800, //i defined w-[900px] for the slider so 900x2 = 1800px
+      crop: "limit",
+      quality: "auto",
+      fetch_format: "auto",
+    }),
+  };
+};
+
 //To GET the last 20 articles on the HomePage-----------
 router.get("/homeArticles", async (req, res) => {
   //function asynchrone donc il y aura await = attend que le code avec await soit terminée pour continuer l'éxécution du code
   try {
     const limit = parseInt(req.query.limit) || 20; // Get the 'limit' query parameter from the request or default to 20
-    const postArticles = await postAllArticles
+    const homeArticles = await postAllArticles
       .find()
       .sort({ _id: -1 })
-      .limit(limit); // Sort by _id in descending order to get the last 20 Articles
-    res.json(postArticles); // !!! res.json() OBLIGé Pour envoyer la data au front-end
+      .limit(limit) // Sort by _id in descending order to get the last 20 Articles
+      .lean(); //To transform Mongoose object to plain Javascript objects, so that we can use them in array functions
+
+    //For each article we keep all it's properties and add 2 images (small for card grid and big for fiche tableau) with the function formatArticleImage
+    const articlesWithNewImages = homeArticles.map(
+      (e) => formatArticleImage(e), //formatArticleImage(e) works without .toObject() thanks to .lean()
+    );
+
+    res.json(articlesWithNewImages); // !!! res.json() OBLIGé Pour envoyer la data au front-end : On envoie l'article avec toutes ses properties + les 2 images qu'on a ajouté
   } catch (error) {
     console.error("Error fetching articles from the database:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -24,13 +72,20 @@ router.get("/homeArticles", async (req, res) => {
 // GET all articles for the DashBoard (newest first)
 router.get("/allArticles", async (req, res) => {
   try {
-    const allArticles = await postAllArticles.find().sort({ _id: -1 });
+    const dashboardArticles = await postAllArticles
+      .find()
+      .sort({ _id: -1 })
+      .lean();
 
-    if (!allArticles || allArticles.length === 0) {
+    if (!dashboardArticles || dashboardArticles.length === 0) {
       return res.status(404).json({ error: "No articles found" });
     }
 
-    res.json(allArticles);
+    const articlesWithNewImages = dashboardArticles.map((e) =>
+      formatArticleImage(e),
+    );
+
+    res.json(articlesWithNewImages);
   } catch (error) {
     console.error("Error fetching articles:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -63,13 +118,14 @@ router.get("/allArtists", async (req, res) => {
   }
 });
 
+//Page qui montre toutes les oeuvres disponibles
 router.get("/allOeuvres", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne aps dupliquer
 
-    const articles = await postAllArticles
+    const allOeuvres = await postAllArticles
       .find({
         type: { $in: ["Tableau", "Photographie", "Sculpture"] },
         $or: [{ prix: { $regex: "\\d" } }, { prix: "Prix sur Demande" }],
@@ -77,9 +133,12 @@ router.get("/allOeuvres", async (req, res) => {
       })
       .sort({ _id: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
-    res.json(articles);
+    const articlesWithNewImages = allOeuvres.map((e) => formatArticleImage(e));
+
+    res.json(articlesWithNewImages);
   } catch (error) {
     console.error("Error fetching all oeuvres:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -99,7 +158,7 @@ router.get("/filterOeuvres", async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne aps dupliquer
 
-    //.agreggate([]) est une méthode Mongoose qui permet d'executer un .find() mais avec plusieurs conditions (donc pour permettre de filtrer)
+    //.agreggate([]) returns plain JS OBject so no need to add .lean() / .aggregate est une méthode Mongoose qui permet d'executer un .find() mais avec plusieurs conditions (donc pour permettre de filtrer)
     const articles = await postAllArticles.aggregate([
       {
         $match: {
@@ -132,7 +191,9 @@ router.get("/filterOeuvres", async (req, res) => {
       { $limit: limit }, // <-- Pagination: limit number of documents
     ]);
 
-    res.json(articles);
+    const articlesWithNewImages = articles.map((e) => formatArticleImage(e));
+
+    res.json(articlesWithNewImages);
   } catch (error) {
     console.error("Error filtering oeuvres:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -146,20 +207,18 @@ router.get("/bestDeals", async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne pas dupliquer
 
-    const bestArticles = await postAllArticles
+    const bestDeals = await postAllArticles
       .find({ bestDeal: "Yes" })
       .sort({ _id: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
-    bestArticles
-      ? res.json(bestArticles)
-      : res.status(404).json({ error: "No best deal articles found" });
+    const articlesWithNewImages = bestDeals.map((e) => formatArticleImage(e));
+
+    res.json(articlesWithNewImages);
   } catch (error) {
-    console.error(
-      "Error fetching best deal articles from the database:",
-      error,
-    );
+    console.error("Error fetching best deals:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -208,7 +267,9 @@ router.get("/filterBestDeals", async (req, res) => {
       { $limit: limit },
     ]);
 
-    res.json(articles);
+    const articlesWithNewImages = articles.map((e) => formatArticleImage(e));
+
+    res.json(articlesWithNewImages);
   } catch (error) {
     console.error("Error filtering oeuvres:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -218,90 +279,24 @@ router.get("/filterBestDeals", async (req, res) => {
 //To GET 1 product for ficheTableau.jsx in the front-end
 router.get("/article/:code", async (req, res) => {
   try {
-    const code = req.params.code; //On extrait le paramètre dynamique définit dans l'url
-    const article = await postAllArticles.findOne({ code: code }); //On cherche 1 produit spécifique grâce à _id extrait du paramètre de l'url et stocké dans la variable articleId
+    const codeParam = req.params.code; //On extrait le paramètre dynamique définit dans l'url
+    const articleFicheTableau = await postAllArticles
+      .findOne({ code: codeParam })
+      .lean(); //On cherche 1 produit spécifique grâce à _id extrait du paramètre de l'url et stocké dans la variable articleId
 
-    article
-      ? res.json(article)
-      : res.status(404).json({ error: "Article not found" });
+    if (!articleFicheTableau) {
+      return res.status(404).json({ error: "Article not found" });
+    }
+
+    //Here we reqquest 1 signle article, so there is no .map
+    const articlesWithNewImages = formatArticleImage(articleFicheTableau);
+
+    res.json(articlesWithNewImages);
   } catch (error) {
     console.error("Error fetching the article from the database:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-router.get("/pageArtist/:auteur", async (req, res) => {
-  try {
-    const auteur = req.params.auteur;
-
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 20;
-    const skip = (page - 1) * limit;
-
-    const hasPriceFilter = req.query.prixMin || req.query.prixMax;
-    const min = req.query.prixMin ? Number(req.query.prixMin) : 0;
-    const max = req.query.prixMax ? Number(req.query.prixMax) : Infinity;
-
-    const pipeline = [
-      {
-        $match: {
-          auteur,
-          type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-        },
-      },
-    ];
-
-    // Only add price logic IF filtering is active
-    if (hasPriceFilter) {
-      pipeline.push(
-        {
-          $addFields: {
-            numericPrice: {
-              $cond: [
-                { $regexMatch: { input: "$prix", regex: "\\d" } },
-                {
-                  $toDouble: {
-                    $replaceAll: {
-                      input: {
-                        $replaceAll: {
-                          input: "$prix",
-                          find: "Dhs",
-                          replacement: "",
-                        },
-                      },
-                      find: " ",
-                      replacement: "",
-                    },
-                  },
-                },
-                null,
-              ],
-            },
-          },
-        },
-        {
-          $match: {
-            numericPrice: { $gte: min, $lte: max },
-          },
-        },
-        { $sort: { numericPrice: 1 } },
-      );
-    } else {
-      // Normal infinite scroll (newest first)
-      pipeline.push({ $sort: { _id: -1 } });
-    }
-
-    pipeline.push({ $skip: skip }, { $limit: limit });
-
-    const articles = await postAllArticles.aggregate(pipeline);
-
-    res.json(articles);
-  } catch (error) {
-    console.error("Error fetching artist oeuvres:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
 
 //To GET toutes les oeuvres d'un artiste spécifique pour PageArtiste.jsx, avec infinite scroll si + de 20 oeuvres
 router.get("/pageArtist/:auteur", async (req, res) => {
@@ -351,7 +346,9 @@ router.get("/pageArtist/:auteur", async (req, res) => {
       { $limit: limit },
     ]);
 
-    res.json(articles);
+    const articlesWithNewImages = articles.map((e) => formatArticleImage(e));
+
+    res.json(articlesWithNewImages);
   } catch (error) {
     console.error("Error fetching artist oeuvres:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -361,8 +358,13 @@ router.get("/pageArtist/:auteur", async (req, res) => {
 // GET all slider images
 router.get("/slider", async (req, res) => {
   try {
-    const sliderImages = await sliderModel.find().sort({ createdAt: 1 }); //createdAt: 1 => Chaque image à une property createdAt et je met 1 pour que l'ordre d'apparition des images dans le diaporama, soit l'ordre d'ajout: De la plus ancienne ajoutée en 1er à la plus récente en dernier
-    res.json(sliderImages); // Send all slider documents (image URL + auteur + timestamps) to the front-end
+    const sliderImages = await sliderModel.find().sort({ createdAt: 1 }).lean(); //createdAt: 1 => Chaque image à une property createdAt et je met 1 pour que l'ordre d'apparition des images dans le diaporama, soit l'ordre d'ajout: De la plus ancienne ajoutée en 1er à la plus récente en dernier
+
+    const articlesWithNewImages = sliderImages.map((e) =>
+      formatArticleImage(e),
+    );
+
+    res.json(articlesWithNewImages); // Send all slider documents (image URL + auteur + timestamps) to the front-end
   } catch (error) {
     console.error("Error fetching slider images:", error);
     res.status(500).json({ error: "Error fetching slider images" });

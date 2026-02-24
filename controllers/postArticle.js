@@ -54,7 +54,7 @@ router.post("/upload", async (req, res) => {
       etat,
       code,
       bestDeal,
-      imageUrl: cloudinaryResult.secure_url, // On utilise la property secure_url de l'objet renvoyé dans cloudinaryResult, pour récupérer l'url sécurisé de l'image uploadé et l'envoyé à la MongoDB Database
+      imagePublicId: cloudinaryResult.public_id, // On utilise la property public_id de cloudinary au lieu de secure_url pour pouvoir ensuite changer la taille de l'image et envoyer de plus petits formats pour les cards of teh grids
     });
 
     // Respond with the new product created
@@ -83,7 +83,7 @@ router.post("/slider", async (req, res) => {
 
     // Create a new document in the MongoDB database with the image values and the auteur name sent from the front-end request dans le formData créé
     const newSliderImage = await sliderModel.create({
-      imageUrl: cloudinaryResult.secure_url,
+      imagePublicId: cloudinaryResult.public_id,
       auteur: req.body.auteur,
       code: req.body.code,
     });

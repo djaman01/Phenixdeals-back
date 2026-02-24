@@ -28,7 +28,7 @@ const allArticles = mongoose.Schema(
     code: {
       type: String,
     },
-    imageUrl: {
+    imagePublicId: {
       type: String,
     },
   },
@@ -44,7 +44,7 @@ const postAllArticles = mongoose.model("allArticles", allArticles);
 // Slider schema
 const sliderSchema = mongoose.Schema(
   {
-    imageUrl: {
+    imagePublicId: {
       type: String,
       required: true, // from Cloudinary
     },
