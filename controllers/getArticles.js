@@ -234,17 +234,11 @@ router.get("/filterBestDeals", async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
 
-    // Build the match object dynamically
-    const match = {
-      type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-      bestDeal: "Yes", //To apply the filter only with artciels that are bestDeals
-    };
-
     const articles = await postAllArticles.aggregate([
       {
         $match: {
-          auteur,
           type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+          bestDeal: "Yes",
         },
       },
       {
@@ -295,7 +289,7 @@ router.get("/filterBestDeals", async (req, res) => {
 
     res.json(articlesWithNewImages);
   } catch (error) {
-    console.error("Error filtering oeuvres:", error);
+    console.error("Error filtering best deals:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
