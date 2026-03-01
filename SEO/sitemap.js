@@ -15,9 +15,8 @@ router.get("/sitemap.xml", async (req, res) => {
     // Configuration des en-têtes pour indiquer qu'il s'agit d'un fichier XML
     res.header("Content-Type", "application/xml");
 
-    // On store notre modèle avec les properties dans la variable articles // .find({}): Récupère tous les articles dans la base de données "code": Mais que le champ "code" pour éviter trop de données
-    // Retourne des objets JavaScript simples pour optimiser les performances pour la lecture
-    const articles = await postAllArticles.find({}, "auteur code").lean(); //pas de , entre auteur et code car ce n'est pas une array, mais une chaine de carctère avec une liste de champs séparés par des espaces
+    // On store notre modèle avec les properties dans la variable articles: We get only 2 fields (auteur and updatedAt) for each document
+    const articles = await postAllArticles.find({}, "auteur updatedAt").lean();
 
     // Construction des liens: Crée un tableau contenant les URLs pour le sitemap et priority = importances des pages pour guider le robot google
 
@@ -30,46 +29,38 @@ router.get("/sitemap.xml", async (req, res) => {
       { url: "/concept", changefreq: "yearly", priority: 0.6 },
     ];
 
-    // Liens pour les pages dynamiques: On dit dynamique car la fin de leur url change en fonction du nom de l'auteur ou de l'_id de l'article
-    //Je veux créer 1 seul et unique lien pour chaque page d'artiste et plusieurs liens pour chaque fiche tableau
-    const uniqueArtists = new Set(); // le Set est un tableau javascript qui ne prend pas les doublons par défaut. Grâce au set je pourrais conditionner l'ajout des url des page Artist pour qu'il n'y ait pas de doublons
+    // Dynamic links: 1 sitemap url per Artist, with the Most Recent update date for that artist
+    const artistMap = new Map(); // Creating an empty map, which is like an object key=>value / "auteur":updatedAt
 
-    //DynamicLinks sera un Array contenant tous les liens dynamiques pour toutes les pages artistes (une seule par auteur) et pour chaque fiche tableau (plusieurs par auteur).
-    //.flatmap: Comme on a des liens pour les pages Artists + liens pour ficheTableau; il permet d'applatir le résultat pour avoir un seul tableau, plutôt qu'un tableau contenant des sous-tableaux.
-    const dynamicLinks = articles.flatMap((article) => {
-      const links = []; //Une array vide se réinitialise pour chaque auteur et cette array Contiendra les dynamic Links crées
+    // Loop through all articles
+    articles.forEach((article) => {
+      const current = artistMap.get(article.auteur); //Check if the artist is already stored =>Return the value stored for auteur which is updated At
 
-      //Vérifie si le Set ne contient pas déjà le nom d'un auteur donné
-      if (!uniqueArtists.has(article.auteur)) {
-        //Si l'auteur n'existe pas dans le set, on ajoute le lien de la pageArtist de l'auteur dans l'array Links.
-        links.push({
-          url: `/pageArtist/${encodeURIComponent(article.auteur)}`,
-          changefreq: "weekly",
-          priority: 0.9,
-        });
-        uniqueArtists.add(article.auteur); // Au final, on rajoute cet auteur au set, pour qu'il ne soit pas traité plusieurs fois et que sa pageArtist ne soit pas rajoutée plusieurs fois au sitemap
+      //If the artist is not stored yet (!current) OR the new article is more recent => Update the Map
+      if (!current || article.updatedAt > current) {
+        artistMap.set(article.auteur, article.updatedAt); //.set is used to add or update a value inside a Map => Store or Update this arist / key= auteurName value= updatedAt
       }
-
-      // Ajouter l'URL pour la fiche tableau dans l'array Links
-      links.push({
-        url: `/${encodeURIComponent(article.auteur)}/${article.code}`,
-        changefreq: "monthly",
-        priority: 0.8,
-      });
-
-      return links; //permet de remplir dynamicLinks avec les liens de chaque auteur (avec un seul lien pour la page de l'artiste et plusieurs pour les fiches de tableaux), avant de passer à l'auteur suivant.
     });
+
+    // Build sitemap links from the Map
+    const dynamicLinks = Array.from(artistMap.entries()).map(
+      ([auteur, lastUpdate]) => ({
+        url: `/pageArtist/${encodeURIComponent(auteur)}`, // Artist page URL
+        changefreq: "weekly", // Page changes regularly
+        priority: 0.9, // High importance
+        lastmod: new Date(lastUpdate).toISOString(), // Real last modification date
+      }),
+    );
 
     // Combiner les liens dynamiques et statiques
     const allLinks = [...staticLinks, ...dynamicLinks];
 
     //!!!!! Quand des pages de siets ne contiennent aps beaucoup de texte ou de liens vers 'autres pages de site, le google bot peut les considérer commeu ne erreur "Soft 404" et ne pas les indéxer
-    //Donc comme mes pages Artistes ne contiennent aps beaucoup de text, ca fait en general erreur Soft404 et google bot priorise les fichesTableaux car elles contiennt du text, des liens et plus d'infos.
-    //C'est pourquopi je mets les ficheTableaux en 0.75, pour les laisser prioritaires, vu que par défauts, le google bot les priorisent par rapport aux pages atistes, au vu de leur contenu
+    //Donc comme mes pages Artistes ne contiennent aps beaucoup de text, ca fait en general erreur Soft404: Je vais donc ajouter les biographies des artistes
 
     // Création du sitemap avec SitemapStream
     const stream = new SitemapStream({
-      hostname: "https://www.phenixdeals.com/",
+      hostname: "https://www.phenixdeals.com",
     }); // Ton domaine principal
 
     //Création du sitemap final: Convertit le flux en une promesse pour obtenir le sitemap final.
