@@ -34,8 +34,16 @@ router.post("/upload", async (req, res) => {
       code,
     } = req.body;
 
-    //Validate required files: Since bestDeal is a boolean !bestDeal === false can be true + infoArticle and allDescription have "" as a default value, and price depends on priceStatus
-    if (!type || !auteur || !priceStatus || !etat || !code) {
+    //Validate required files: Since bestDeal is a boolean !bestDeal === false can be true, so we don't add it
+    if (
+      !type ||
+      !auteur ||
+      !infoArticle ||
+      !allDescription ||
+      !priceStatus ||
+      !etat ||
+      !code
+    ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
