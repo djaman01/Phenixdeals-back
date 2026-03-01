@@ -4,32 +4,45 @@ const mongoose = require("mongoose");
 const allArticles = mongoose.Schema(
   {
     type: {
-      type: String,
+      type: String, //Majuscule obligatoire pour la 1ere letter des type
+      required: true,
     },
     auteur: {
       type: String,
+      required: true,
     },
     infoArticle: {
       type: String,
+      default: "", //no need to add required:"true", because their is this default value "". "" prevents undefined if no value
     },
     allDescription: {
       type: String,
       default: "", // <-- important because i've created this column after adding the products, so it can't be undefined
     },
     prix: {
+      type: Number, //Not required:true, because sometimes their will be no price when status= sold or onRequest
+    },
+    priceStatus: {
       type: String,
+      enum: ["available", "sold", "onRequest"], //Better to store technical values in English in the database Then translate it in French on the front-end / enum = enumeration => To tell Mongoose that this field must be one of these 3 values
+      default: "available",
     },
     etat: {
       type: String,
+      required: true,
     },
     bestDeal: {
-      type: String,
+      type: Boolean, //So i'll have to write: bestDeal: true or false
+      default: false,
     },
     code: {
       type: String,
+      required: true,
+      unique: true,
     },
     imagePublicId: {
       type: String,
+      required: true,
     },
   },
 
@@ -37,6 +50,7 @@ const allArticles = mongoose.Schema(
     timestamps: true, // Adds createdAt and updatedAt fields on the database
   },
 );
+
 ////création modele : mongoose.model("collectionName", schema)
 //On le stock dans postAllArticles pour pouvoir l'exporter
 const postAllArticles = mongoose.model("allArticles", allArticles);

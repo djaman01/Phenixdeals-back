@@ -101,7 +101,8 @@ router.get("/allArtists", async (req, res) => {
         { type: { $in: ["Tableau", "Photographie", "Sculpture"] } }, //$in is a MongoDB operator that matches any value in the given array. = So, it'll return all articles whose type = one of those three values
         { auteur: 1, _id: 0 },
       )
-      .sort({ auteur: 1 });
+      .sort({ auteur: 1 })
+      .lean();
 
     // Utilisation du constructeur Set pour crée une array avec les noms des auteurs, SANS DOUBLONS ! Ainsi, même si j'ajoute plusieurs Kalmoun je n'aurais que 1 [Kalmoun]
     const uniqueArtists = [...new Set(allArticles.map((e) => e.auteur))];
@@ -128,10 +129,9 @@ router.get("/allOeuvres", async (req, res) => {
     const allOeuvres = await postAllArticles
       .find({
         type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-        $or: [{ prix: { $regex: "\\d" } }, { prix: "Prix sur Demande" }],
-        prix: { $ne: "Vendu" },
+        priceStatus: { $in: ["available", "onRequest"] },
       })
-      .sort({ _id: -1 })
+      .sort({ _id: -1 }) //Sort in descending order (newest document first)
       .skip(skip)
       .limit(limit)
       .lean();
@@ -154,42 +154,20 @@ router.get("/filterOeuvres", async (req, res) => {
     const min = prixMin ? Number(prixMin) : 0;
     const max = prixMax ? Number(prixMax) : 999999999;
 
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 20;
-    const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne aps dupliquer
+    const page = parseInt(req.query.page, 10) || 1; // ,10 => to treat the result as normal decimal number
+    const limit = parseInt(req.query.limit, 10) || 20; // ||20 To skip the 20 first results if the user doesn't send a limit
+    const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne pas dupliquer
 
-    //.aggregate([]) returns plain JS OBject so no need to add .lean() / .aggregate est une méthode Mongoose qui permet d'executer un .find() mais avec plusieurs conditions (donc pour permettre de filtrer)
-    const articles = await postAllArticles.aggregate([
-      {
-        $match: {
-          type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-          prix: { $regex: "\\d" }, //Match any string that contains a digit (0-9) so it excludes the one without digits
-        },
-      },
-      {
-        $addFields: {
-          numericPrice: {
-            $toDouble: {
-              $replaceAll: {
-                input: {
-                  $replaceAll: { input: "$prix", find: "Dhs", replacement: "" },
-                },
-                find: " ",
-                replacement: "",
-              },
-            },
-          },
-        },
-      },
-      {
-        $match: {
-          numericPrice: { $gte: min, $lte: max },
-        },
-      },
-      { $sort: { numericPrice: 1 } },
-      { $skip: skip }, // <-- Pagination: skip documents
-      { $limit: limit }, // <-- Pagination: limit number of documents
-    ]);
+    const articles = await postAllArticles
+      .find({
+        type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+        priceStatus: "available",
+        prix: { $gte: min, $lte: max }, //gte = greater than or equal / lte= less than or equal
+      })
+      .sort({ prix: 1 }) //1 is to sort the result ascending: from the lower prices to the higher prices
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     const articlesWithNewImages = articles.map((e) => formatArticleImage(e));
 
@@ -208,7 +186,11 @@ router.get("/bestDeals", async (req, res) => {
     const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne pas dupliquer
 
     const bestDeals = await postAllArticles
-      .find({ bestDeal: "Yes" })
+      .find({
+        type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+        bestDeal: true,
+        priceStatus: { $in: ["available", "onRequest"] },
+      })
       .sort({ _id: -1 })
       .skip(skip)
       .limit(limit)
@@ -234,56 +216,17 @@ router.get("/filterBestDeals", async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
 
-    const articles = await postAllArticles.aggregate([
-      {
-        $match: {
-          type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-          bestDeal: "Yes",
-        },
-      },
-      {
-        $addFields: {
-          numericPrice: {
-            $convert: {
-              input: {
-                $replaceAll: {
-                  input: {
-                    $replaceAll: {
-                      input: "$prix",
-                      find: "Dhs",
-                      replacement: "",
-                    },
-                  },
-                  find: " ",
-                  replacement: "",
-                },
-              },
-              to: "double",
-              onError: null,
-              onNull: null,
-            },
-          },
-        },
-      },
-      {
-        $match: {
-          $or: [
-            { numericPrice: { $gte: min, $lte: max } },
-            { prix: { $in: ["Vendu", "Prix sur Demande"] } },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          sortOrder: {
-            $cond: [{ $eq: ["$numericPrice", null] }, 1, 0],
-          },
-        },
-      },
-      { $sort: { sortOrder: 1, numericPrice: 1 } },
-      { $skip: skip },
-      { $limit: limit },
-    ]);
+    const articles = await postAllArticles
+      .find({
+        type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+        bestDeal: true,
+        priceStatus: "available",
+        prix: { $gte: min, $lte: max },
+      })
+      .sort({ prix: 1 }) //From lower to higher price
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     const articlesWithNewImages = articles.map((e) => formatArticleImage(e));
 
@@ -325,59 +268,30 @@ router.get("/pageArtist/:auteur", async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
 
-    const min = req.query.prixMin ? Number(req.query.prixMin) : 0;
-    const max = req.query.prixMax ? Number(req.query.prixMax) : 999999999;
+    const { prixMin, prixMax } = req.query;
 
-    const articles = await postAllArticles.aggregate([
-      {
-        $match: {
-          auteur,
-          type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-        },
-      },
-      {
-        $addFields: {
-          numericPrice: {
-            $convert: {
-              input: {
-                $replaceAll: {
-                  input: {
-                    $replaceAll: {
-                      input: "$prix",
-                      find: "Dhs",
-                      replacement: "",
-                    },
-                  },
-                  find: " ",
-                  replacement: "",
-                },
-              },
-              to: "double",
-              onError: null,
-              onNull: null,
-            },
-          },
-        },
-      },
-      {
-        $match: {
-          $or: [
-            { numericPrice: { $gte: min, $lte: max } },
-            { prix: { $in: ["Vendu", "Prix sur Demande"] } },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          sortOrder: {
-            $cond: [{ $eq: ["$numericPrice", null] }, 1, 0],
-          },
-        },
-      },
-      { $sort: { sortOrder: 1, numericPrice: 1 } },
-      { $skip: skip },
-      { $limit: limit },
-    ]);
+    const min = prixMin ? Number(prixMin) : 0;
+    const max = prixMax ? Number(prixMax) : 999999999;
+
+    //If no filter
+    let query = {
+      auteur,
+      type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+      //I don't add priceStatus: {$in:["","",""]} => because i want all 3 priceStatus to appear in the artist page; so no need to define it
+    };
+
+    // If user filters by price, change the priceStatus and add a prix range to  the query so that it shows only available artworks with the specific price
+    if (prixMin || prixMax) {
+      query.priceStatus = "available";
+      query.prix = { $gte: min, $lte: max };
+    }
+
+    const articles = await postAllArticles
+      .find(query)
+      .sort(prixMin || prixMax ? { prix: 1 } : { _id: -1 }) //If the user make a query with a specific price, show from lower to higher price / if not show from the newest to the oldest painting
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     const articlesWithNewImages = articles.map((e) => formatArticleImage(e));
 
@@ -387,6 +301,7 @@ router.get("/pageArtist/:auteur", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 // GET all slider images
 router.get("/slider", async (req, res) => {
   try {
