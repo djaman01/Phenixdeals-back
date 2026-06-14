@@ -148,7 +148,7 @@ router.get("/allOeuvres", async (req, res) => {
 // Route: Fetch oeuvres with serverside Filtering + PAGINATION
 router.get("/filterOeuvres", async (req, res) => {
   try {
-    const { prixMin, prixMax } = req.query;
+    const { prixMin, prixMax, style } = req.query;
 
     //Pour changer les strings "3000" reçu du front-end en valeur numérique / : 0 et : 999999 => valeur par défaut de l'input si l'utilisateur n'écrit qu'un prix min ou qu'un prix max
     const min = prixMin ? Number(prixMin) : 0;
@@ -158,13 +158,21 @@ router.get("/filterOeuvres", async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20; // ||20 To skip the 20 first results if the user doesn't send a limit
     const skip = (page - 1) * limit; //Pour skip les 20 dejà fetch et ne pas dupliquer
 
+    //query to add in .find in const articles
+    const query = {
+      type: { $in: ["Tableau", "Photographie", "Sculpture"] },
+      priceStatus: "available",
+      prix: { $gte: min, $lte: max }, //gte = greater than or equal / lte= less than or equal
+    };
+
+    //Ajout du filtre par style dans la query si l'utilisateur selectionne un style
+    if (style) {
+      query.style = style;
+    }
+
     const articles = await postAllArticles
-      .find({
-        type: { $in: ["Tableau", "Photographie", "Sculpture"] },
-        priceStatus: "available",
-        prix: { $gte: min, $lte: max }, //gte = greater than or equal / lte= less than or equal
-      })
-      .sort({ prix: 1 }) //1 is to sort the result ascending: from the lower prices to the higher prices
+      .find(query)
+      .sort({ prix: 1 }) //1: Sort from cheapest to most expensive
       .skip(skip)
       .limit(limit)
       .lean();

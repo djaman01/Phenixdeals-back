@@ -25,6 +25,7 @@ router.post("/upload", async (req, res) => {
     const {
       type,
       auteur,
+      style,
       infoArticle,
       allDescription,
       prix,
@@ -34,7 +35,7 @@ router.post("/upload", async (req, res) => {
       code,
     } = req.body;
 
-    //Validate required files: Since bestDeal is a boolean !bestDeal === false can be true, so we don't add it
+    //Validate required files: Since bestDeal is a boolean !bestDeal === false can be true, so we don't add it / style can be empty so no need to add it
     if (
       !type ||
       !auteur ||
@@ -77,6 +78,7 @@ router.post("/upload", async (req, res) => {
     const newArticle = await postAllArticles.create({
       type,
       auteur,
+      style,
       infoArticle,
       allDescription,
       prix: numericPrice, //now number

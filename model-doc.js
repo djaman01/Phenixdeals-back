@@ -11,6 +11,11 @@ const allArticles = mongoose.Schema(
       type: String,
       required: true,
     },
+    style: {
+      type: String,
+      enum: ["", "Abstrait", "Figuratif", "Figuratif libre", "Naif"], //I add "" in the beginning, so that i can do default:"" => because default will choose a value in the array
+      default: "",
+    },
     infoArticle: {
       type: String,
       default: "", //no need to add required:"true", because their is this default value "". "" prevents undefined if no value

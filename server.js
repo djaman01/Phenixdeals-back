@@ -16,7 +16,8 @@ app.use(express.json()); //To parse incoming JSON data from HTTP requests, to Js
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", // ✅ To make it work locally
+      "http://localhost:5173", // ✅ To make it work locally for development
+      "http://localhost:4173", //For the pre-render with puppeteer
       "https://www.phenixdeals.com", // New official domain
       "https://www.phenix-deals.com", //For redirect or legacy users
       "https://phenixdeals-vite-n4qpkja68-djaman01s-projects.vercel.app", // Optional: Vercel preview
